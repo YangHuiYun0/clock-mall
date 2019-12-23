@@ -2,12 +2,10 @@
   <div>
     <div class="title">
       <div class="logo-title">
-        <div class="icon"></div>
-        <div class="tit1"><span>WATCH</span></div>
-        <div class="tit2">钟表商城</div>
+        <i>&nbsp;</i>小路知道
+        <p>WATCH</p>
       </div>
       <el-menu
-        :default-active="activeIndex2"
         class="el-menu-demo el-menu-custom"
         mode="horizontal"
         @select="handleSelect"
@@ -31,7 +29,10 @@
         <el-menu-item index="5">店铺介绍</el-menu-item>
         <el-menu-item index="6">联系我们</el-menu-item>
       </el-menu>
-
+      <span >
+        <el-link icon="el-icon-user">登录</el-link>
+        <el-link icon="el-icon-warning-outline">退出</el-link>
+      </span>
     </div>
     
   </div>
@@ -58,34 +59,20 @@ export default {
  }
 }
 .logo-title{
-  width: 196px;
-  height: 181px;
-  background-color: rgb(190, 135, 68);
-  position: absolute;
-  left: 20%;
-  .icon{
-    position: absolute;
-    width: 75px;
-    height: 66px;
-    left: 61px;
-    top: 13px;
-    background: url('./image/logo.png') 0 0 no-repeat {
-      size: 100%;
-    }
-  }
-  .tit1{
-    position: absolute;
-    text-align: center;
-    top: 85px;
-    left: 62px;
-    color: rgb(164, 110, 45);
-    font-size: 25px;
-  }
-  .tit2{
-    position: absolute;
-    top: 100px;
-    font-size: 25px;
-    color: rgb(170, 100, 14);
+  width: 300px;
+  height: 100px;
+  margin-left: 100px;
+  font-family: '楷体';
+  font-size: 38px;
+  color: rgb(190,135,68);
+  line-height: 80px;
+  p{
+    font-size: 18px;
+    padding: 0;
+    margin-top: -50px;
+    height: 30px;
+    color: rgb(150, 118, 80);
+    text-align: center
   }
 }
 
