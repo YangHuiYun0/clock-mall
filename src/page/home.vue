@@ -1,6 +1,7 @@
 <template>
   <div>
     <HeadTop/>
+    <router-view></router-view>
   </div>
 </template>
 
