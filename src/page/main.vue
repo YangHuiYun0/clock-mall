@@ -2,36 +2,98 @@
   <div>
     <!-- 主页 -->
     <!-- 轮播图 -->
-    <div class="swpr">
-      <el-carousel trigger="click" height="150px">
-        <el-carousel-item v-for="item in 4" :key="item">
-          <h3 class="small">{{ item }}</h3>
-        </el-carousel-item>
-      </el-carousel>
-    </div>
+   <swipt></swipt>
   </div>
 </template>
 
 <script>
+import Swipt from '../components/swipt'
 export default {
-
+  data(){
+    return{
+      error: false,
+      
+      mark: 0,
+      bgOpt: {
+        px: 0,
+        py: 0,
+        w: 0,
+        h: 0
+      },
+      home: [],
+      loading: true,
+      notify: '1',
+      dialogVisible: false,
+      timer: ''
+    }
+  },
+  components:{
+    Swipt,
+  },
+  created () {
+    // this.play()
+  },
+  methods: {
+  }
 }
 </script>
 
 <style lang="scss" scoped>
- .el-carousel__item h3 {
-    color: #475669;
-    font-size: 14px;
-    opacity: 0.75;
-    line-height: 150px;
-    margin: 0;
+   .banner, .banner span, .banner div {
+    font-family: "Microsoft YaHei";
+    transition: all .3s;
+    transition-timing-function: linear;
   }
 
-  .el-carousel__item:nth-child(2n) {
-     background-color: #99a9bf;
+  .banner {
+    cursor: pointer;
+    perspective: 3000px;
+    position: relative;
+    z-index: 19;
+    margin: 0 auto;
+    width: 1220px;
+    height: 500px;
   }
-  
-  .el-carousel__item:nth-child(2n+1) {
-     background-color: #d3dce6;
+  .img1 {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    border-radius: 10px;
+  }
+
+  .img2 {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 5px;
+    left: 0;
+    background-size: 95% 100%;
+    border-radius: 10px;
+  }
+
+  .img3 {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    border-radius: 10px;
+  }
+
+  .a {
+    z-index: 20;
+    transform: translateZ(40px);
+  }
+
+  .b {
+    z-index: 20;
+    transform: translateZ(30px);
+  }
+
+  .c {
+    transform: translateZ(0px);
   }
 </style>

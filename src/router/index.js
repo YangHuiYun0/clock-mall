@@ -9,11 +9,10 @@ const routes = [
 	{
 		path: '/',
 		component: home,
-		children: [{
-			path: '/main',
-			component: main,
-			meta: [],
-    },]
+		redirect: '/main',
+		children: [
+			{path: 'main', component: main},
+		]
 	},
 	
 ]

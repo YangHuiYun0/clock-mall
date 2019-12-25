@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import HeadTop from "../components/headTop";
+import HeadTop from "../common/header";
 export default {
   components:{
     HeadTop,
@@ -14,6 +14,12 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss" scoped>
+  .main {
+    min-height: calc(100vh - 454px);
+    background: #ededed;
+    overflow: hidden;
+    width: 100%;
+  }
 </style>
+
