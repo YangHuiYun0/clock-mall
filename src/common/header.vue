@@ -20,7 +20,7 @@
                 @keydown.enter.native="handleIconClick">
               </el-autocomplete>
               <router-link to="/goods"><a @click="changePage(2)">全部商品</a></router-link>
-              <!-- <router-link to="/thanks"><a @click="changePage(4)">捐赠</a></router-link> -->
+              <router-link to="/main"><a @click="changePage(4)">首页</a></router-link>
             </div>
             <div class="nav-aside" ref="aside" :class="{fixed:st}">
               <div class="user pr">
@@ -87,11 +87,11 @@
                       <div class="nav-cart-total"><p>共 <strong>{{totalNum}}</strong> 件商品</p> <h5>合计：<span
                         class="price-icon">¥</span><span
                         class="price-num">{{totalPrice}}</span></h5>
-                        <!-- <h6>
+                        <h6>
                           <y-button classStyle="main-btn"
                                     style="height: 40px;width: 100%;margin: 0;color: #fff;font-size: 14px;line-height: 38px"
                                     text="去购物车" @btnClick="toCart"></y-button>
-                        </h6> -->
+                        </h6>
                       </div>
                     </div>
                     <div v-show="!totalNum" style="height: 313px;text-align: center" class="cart-con">
@@ -109,8 +109,13 @@
 </template>
 <script>
 import { mapMutations, mapState } from 'vuex'
+import YShelf from "../components/shelf";
+import YButton  from "../components/yButton";
 export default {
   name:'headTop',
+  components:{
+    YShelf,YButton
+  },
   data () {
     return {
       user: {},
@@ -240,8 +245,23 @@ export default {
       //   window.location.href = '/'
       // })
     },
+    //去购物车
     toCart () {
       this.$router.push({path: '/cart'})
+    },
+    // 导航栏文字样式改变
+    changePage (v) {
+      this.choosePage = v
+    },
+    // 删除商品
+    delGoods (productId) {
+      // if (this.login) { // 登陆了
+      //   cartDel({userId: getStore('userId'), productId}).then(res => {
+      //     this.EDIT_CART({productId})
+      //   })
+      // } else {
+      //   this.EDIT_CART({productId})
+      // }
     },
   }
 }
