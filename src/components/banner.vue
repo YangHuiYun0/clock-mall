@@ -51,7 +51,7 @@ export default {
       autoPlay () {
         this.mark++
         if (this.mark > this.banner.length - 1) {
-          // 当遍历到最后一张图片置零
+          // 当遍历到最后一张图片置零  测试
           this.mark = 0
         }
       },
