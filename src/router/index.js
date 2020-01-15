@@ -6,6 +6,7 @@ const home = r => require.ensure([], () => r(require('@/page/home')), 'home');
 const main = r => require.ensure([], () => r(require('@/page/main')), 'main');
 const goods = r => require.ensure([], () => r(require('@/page/goods')), 'goods');
 const goodsDetails = r => require.ensure([], () => r(require('@/page/goodsDetails')), 'goodsDetails');
+const cart = r => require.ensure([], () => r(require('@/page/cart')), 'cart');
 const routes = [
 	{
 		path: '/',
@@ -16,7 +17,8 @@ const routes = [
 			{path: 'goods', component: goods},
 			{path: 'goodsDetails', name: 'goodsDetails', component: goodsDetails},
 		]
-	},
+	}, 
+	{path: '/cart', name: 'cart', component: cart},
 	
 ]
 

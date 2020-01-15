@@ -104,6 +104,24 @@
           </div>
         </div>
       </header>
+       <slot name="nav">
+        <div class="nav-sub" :class="{fixed:st}">
+          <div class="nav-sub-bg"></div>
+          <div class="nav-sub-wrapper" :class="{fixed:st}">
+            <div class="w">
+              <ul class="nav-list2">
+                <li>
+                  <router-link to="/"><a @click="changGoods(-1)" :class="{active:choosePage===-1}">首页</a></router-link>
+                </li>
+                <li>
+                  <a @click="changGoods(-2)" :class="{active:choosePage===-2}">全部</a>
+                </li>
+              </ul>
+              <div></div>
+            </div>
+          </div>
+        </div>
+      </slot>
     </div>
   </div>
 </template>
@@ -133,15 +151,15 @@ export default {
       token: '',
       navList: [],
       userInfo:{info:{username:'嘻嘻嘻嘻'}},
-      receiveInCart: false, // 是否进入购物车
-      showCart: false, // 是否显示购物车
-      cartList: [],   // 加入购物车列表
+      // receiveInCart: false, // 是否进入购物车
+      // showCart: false, // 是否显示购物车
+      cartList: [{productNum:1}],   // 加入购物车列表
     }
   },
   computed: {
-    // ...mapState([
-    //     'cartList', 'login', 'receiveInCart', 'showCart', 'userInfo'
-    //   ]),
+    ...mapState([
+         'login', 'receiveInCart', 'showCart', 
+      ]),//todo  记得补上'userInfo' 'cartList',
     // 计算价格
     totalPrice () {
       var totalPrice = 0
@@ -160,6 +178,7 @@ export default {
     }
   },
   methods:{
+     ...mapMutations(['ADD_CART', 'INIT_BUYCART', 'ADD_ANIMATION', 'SHOW_CART', 'REDUCE_CART', 'RECORD_USERINFO', 'EDIT_CART']),
     //点击搜索框
     handleIconClick (ev) {
         if (this.$route.path === '/search') {
@@ -198,8 +217,8 @@ export default {
       this.input = item.value
     },
     // 购物车显示
-    cartShowState () {
-      // this.SHOW_CART({showCart: state})
+    cartShowState (state) {
+      this.SHOW_CART({showCart: state})
     },
     // 搜索框提示
     loadAll () {
@@ -249,6 +268,20 @@ export default {
     toCart () {
       this.$router.push({path: '/cart'})
     },
+    // 控制顶部
+      navFixed () {
+        if (this.$route.path === '/goods' || this.$route.path === '/main' || this.$route.path === '/goodsDetails' || this.$route.path === '/thanks') {
+          var st = document.documentElement.scrollTop || document.body.scrollTop
+          st >= 100 ? this.st = true : this.st = false
+          // 计算小圆当前位置
+          let num = document.querySelector('.num')
+          this.positionL = num.getBoundingClientRect().left
+          this.positionT = num.getBoundingClientRect().top
+          this.ADD_ANIMATION({cartPositionL: this.positionL, cartPositionT: this.positionT})
+        } else {
+          return
+        }
+      },
     // 导航栏文字样式改变
     changePage (v) {
       this.choosePage = v
@@ -263,7 +296,12 @@ export default {
       //   this.EDIT_CART({productId})
       // }
     },
-  }
+  },
+  mounted(){
+    this.navFixed();
+    window.addEventListener('scroll', this.navFixed)
+    window.addEventListener('resize', this.navFixed)
+  },
 }
 </script>
 <style lang="scss" rel="stylesheet/scss" scoped>
@@ -773,6 +811,9 @@ export default {
           line-height: 16px;
           font-size: 12px;
           color: #c1c1c1;
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
         }
         h5 {
           line-height: 20px;
@@ -788,12 +829,18 @@ export default {
             font-size: 12px;
             margin-right: 5px;
           }
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
         }
         h6 {
           position: absolute;
           right: 20px;
           top: 20px;
           width: 108px;
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
         }
       }
     }
@@ -866,7 +913,108 @@ export default {
     height: 62px;
     background: url("/static/images/cart-empty-new.png") no-repeat;
     background-size: cover;
+  }
 
+    .nav-sub {
+    position: relative;
+    z-index: 20;
+    height: 90px;
+    background: #f7f7f7;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .04);
+    &.fixed {
+      position: fixed;
+      z-index: 21;
+      height: 60px;
+      top: 0;
+      left: 0;
+      right: 0;
+      border-bottom: 1px solid #dadada;
+      background-image: -webkit-linear-gradient(#fff, #f1f1f1);
+      background-image: linear-gradient(#fff, #f1f1f1);
+    }
+    .nav-sub-wrapper {
+      padding: 31px 0;
+      height: 90px;
+      position: relative;
+      &.fixed {
+        padding: 0;
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
+      &:after {
+        content: " ";
+        position: absolute;
+        top: 89px;
+        left: 50%;
+        margin-left: -610px;
+        width: 1220px;
+        background: #000;
+        height: 1px;
+        display: none;
+        opacity: 0;
+        -webkit-transition: opacity .3s ease-in;
+        transition: opacity .3s ease-in;
+      }
+    }
+    .w {
+      display: flex;
+      justify-content: space-between;
+    }
+    .nav-list2 {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      height: 28px;
+      line-height: 28px;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      li:first-child {
+        padding-left: 0;
+        a {
+          padding-left: 10px;
+        }
+      }
+      li {
+        position: relative;
+        float: left;
+        padding-left: 2px;
+        a {
+          display: block;
+          padding: 0 10px;
+          color: #666;
+          &.active {
+            font-weight: bold;
+          }
+        }
+        a:hover {
+          color: #5683EA;
+        }
+      }
+      li:before {
+        content: ' ';
+        position: absolute;
+        left: 0;
+        top: 13px;
+        width: 2px;
+        height: 2px;
+        background: #bdbdbd;
+      }
+    }
+  }
+
+  @media (min-width: 1px) {
+    .nav-sub .nav-sub-wrapper:after {
+      display: block;
+    }
+  }
+  .w{
+    width: 1220px;
+    margin: 0 auto;
+    padding: 0;
+    box-sizing: border-box;
+    font-size: 14px;
   }
 </style>
 

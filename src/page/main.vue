@@ -17,7 +17,7 @@
         <y-shelf :title="item.name">
           <div slot="content" class="floors" >
             <div class="imgbanner" v-for="(iitem,j) in item.panelContents" :key="j" v-if="iitem.type === 2 || iitem.type === 3" @click="linkTo(iitem)">
-              <img v-lazy="iitem.picUrl">
+              <img v-lazy="iitem.picUrl" >
               <a class="cover-link"></a>
             </div>
             <mall-goods :msg="iitem" v-for="(iitem,j) in item.panelContents" :key="j+'key'" v-if="iitem.type != 2 && iitem.type != 3"></mall-goods>
@@ -57,16 +57,13 @@ export default {
           name: "热门商品",
           panelContents:[
             {created:1508682391000,
-            fullUrl: null,
             id: 22,
             panelId: 1,
-            picUrl: "https://i.loli.net/2018/07/13/5b48a7f468bf2.png",
-            picUrl2: null,
-            picUrl3: null,
-            productId: 150635087972564,
+            goodsUrl: "https://i.loli.net/2018/07/13/5b48a7f468bf2.png",
+            goodsCode: 150635087972564,//productId
             productImageBig: "https://i.loli.net/2018/07/13/5b48a7f468bf2.png",
-            productName: "支付测试商品 IPhone X 全面屏 全面绽放",
-            salePrice: 1,
+            goodsName: "支付测试商品 IPhone X 全面屏 全面绽放",
+            goodsPrice: 1,
             sortOrder: 1,
             subTitle: "此仅为支付测试商品 拍下不会发货",
             type: 0,
@@ -100,7 +97,7 @@ export default {
               picUrl3: null,
               productId: 150642571432843,
               productImageBig: "https://resource.smartisan.com/resource/1/1220858shoujilouceng.jpg",
-              productName: "坚果 3",
+              goodsName: "坚果 3",
               salePrice: 1999,
               sortOrder: 0,
               subTitle: "漂亮得不像实力派",

@@ -6,9 +6,7 @@
         @mouseover="bgOver($refs.bg)" @mousemove="bgMove($refs.bg,$event)" @mouseout="bgOut($refs.bg)">
         <transition name="fade">
           <!-- <div v-for="(item, i) in banner" v-if="i===mark" :key="i" style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
-            <img v-if="item.picUrl" class="img1" :src="item.picUrl"/>
-            <img v-if="item.picUrl2"  class="img2 a" :src="item.picUrl2"/>
-            <img v-if="item.picUrl3"  class="img3 b" :src="item.picUrl3"/>
+            <img v-if="item.bannerUrl" class="img1" :src="item.bannerUrl"/>
           </div> -->
           <div  v-if="0===mark"  style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
             <img  class="img1" src="./image/bnr-1.jpg"/>
