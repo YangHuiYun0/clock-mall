@@ -1,30 +1,36 @@
-# clock-mall
+####初始化项目
+-npm  install
+-npm run dev
 
-> A Vue.js project
+####前台页面目录
+  page
+      -before-page  前台
+          -User                 个人中心
+              -children
+                  -addressList  收货地址列表
+                  -order        订单列表
+                  -userinfo     个人信息
+              -user             个人中心首页
+          -cart                 购物车列表
+          -goods                全部商品
+          -goodsDetails         商品详情
+          -home                 商城首页
+          -main                 导航栏
 
-## Build Setup
-
-``` bash
-# install dependencies
-npm install
-
-# serve with hot reload at localhost:8080
-npm run dev
-
-# build for production with minification
-npm run build
-
-# build for production and view the bundle analyzer report
-npm run build --report
-
-# run unit tests
-npm run unit
-
-# run e2e tests
-npm run e2e
-
-# run all tests
-npm test
-```
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+      -web-page  后台
+          -goods-manage       商品管理模块
+              -brandDetails   品牌详情
+              -brandList      品牌列表
+              -goodsDetails   商品详情
+              -goodsList      商品列表
+          -home-set           首页信息配置
+              -bannerDetails  轮播图详情
+              -bannerList     轮播图列表
+          -member-manage      会员管理
+              -memberList     会员列表
+          -order-manage       订单管理
+              -orderDetails   订单详情
+              -orderList      订单列表
+              -returnApply    退货申请列表
+              -returnApplyDetail  退货详情
+              -saleSetList    退货原因设置

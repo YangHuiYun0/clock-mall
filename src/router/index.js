@@ -14,6 +14,7 @@ const user = r => require.ensure([], () => r(require('@/page/before-page/User/us
 const orderList = r => require.ensure([], () => r(require('@/page/before-page/User/children/order')), 'orderList');
 const addressList = r => require.ensure([], () => r(require('@/page/before-page/User/children/addressList')), 'addressList');
 const userInfo = r => require.ensure([], () => r(require('@/page/before-page/User/children/userInfo')), 'userInfo');
+const checkout = r => require.ensure([], () => r(require('@/page/before-page/checkout')), 'checkout');
 
 
 // ===================================管理后台的路由=========================================
@@ -50,7 +51,8 @@ const routes = [
 			{path: 'before-goodsDetails', name: 'goodsDetails', component: beforegoodsDetails},
 		]
 	}, 
-	{path: '/before-cart', name: 'cart', component: cart},
+  {path: '/before-cart', name: 'cart', component: cart},
+  {path: '/before-checkout', name: 'checkout', component: checkout},
 	{
 		path: '/user',
 		name: 'user',
