@@ -8,6 +8,10 @@ import router from './router'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
+import Breadcrumb from './components/breadcrumb/index';
+
+Vue.component('Breadcrumb', Breadcrumb);
+
 Vue.use(VueLazyload, {
   
   loading: '/static/images/load.gif'

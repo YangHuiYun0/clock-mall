@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import HeadTop from "../common/header";
+import HeadTop from "../../common/header";
   import { mapState, mapMutations } from 'vuex'
 export default {
   components:{
@@ -56,7 +56,7 @@ export default {
 </script>
 
 <style lang="scss" rel="stylesheet/scss" scoped>
-  @import "../assets/style/mixin";
+  @import "../../assets/style/mixin";
 
   .main {
     min-height: calc(100vh - 454px);

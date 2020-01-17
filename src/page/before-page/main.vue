@@ -29,9 +29,9 @@
 </template>
 
 <script>
-import banner from '../components/banner'
-import YShelf from "../components/shelf"; //卡片组件
-import mallGoods from "../components/mallGoods";
+import banner from '../../components/banner'
+import YShelf from "../../components/shelf"; //卡片组件
+import mallGoods from "../../components/mallGoods";
 export default {
   components:{
     banner,

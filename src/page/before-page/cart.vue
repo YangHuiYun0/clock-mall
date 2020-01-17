@@ -79,11 +79,11 @@
 </template>
 
 <script>
-import YHeader from '../common/header'
+import YHeader from '../../common/header'
 import { mapMutations, mapState } from 'vuex'
-import YShelf from "../components/shelf";
-import YButton  from "../components/yButton";
-import BuyNum from '../components/buynum'
+import YShelf from "../../components/shelf";
+import YButton  from "../../components/yButton";
+import BuyNum from '../../components/buynum'
 export default {
   components:{
     YHeader,YShelf,YButton,BuyNum

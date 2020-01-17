@@ -50,9 +50,9 @@
 </template>
 
 <script>
-import YShelf from "../components/shelf"; //卡片组件
-import mallGoods from "../components/mallGoods";
-import YButton  from "../components/yButton";
+import YShelf from "../../components/shelf"; //卡片组件
+import mallGoods from "../../components/mallGoods";
+import YButton  from "../../components/yButton";
 export default {
     components:{
         YShelf,mallGoods,YButton
@@ -150,8 +150,8 @@ export default {
 
 </script>
 <style lang='scss' scoped>
-    @import "../assets/style/mixin";
-    @import "../assets/style/theme";
+    @import "../../assets/style/mixin";
+    @import "../../assets/style/theme";
     a{
         text-decoration:none;
     }

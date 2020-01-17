@@ -19,8 +19,9 @@
                 :on-icon-click="handleIconClick"
                 @keydown.enter.native="handleIconClick">
               </el-autocomplete>
-              <router-link to="/goods"><a @click="changePage(2)">全部商品</a></router-link>
-              <router-link to="/main"><a @click="changePage(4)">首页</a></router-link>
+              <router-link to="/before-goods"><a @click="changePage(2)">全部商品</a></router-link>
+              <router-link to="/before-main"><a @click="changePage(4)">首页</a></router-link>
+              <router-link to="/login"><a @click="changePage(5)">管理员权限</a></router-link>
             </div>
             <div class="nav-aside" ref="aside" :class="{fixed:st}">
               <div class="user pr">
@@ -37,11 +38,9 @@
                         </div>
                         <p class="name">{{userInfo.info.username}}</p>
                       </li>
-                      <li>  <router-link to="/user/orderList">我的订单</router-link>  </li>
-                      <li>  <router-link to="/user/information">账号资料</router-link>  </li>
-                      <li>  <router-link to="/user/addressList">收货地址</router-link>  </li>
-                      <li>  <router-link to="/user/support">售后服务</router-link>  </li>
-                      <li>  <router-link to="/user/coupon">我的优惠</router-link>  </li>
+                      <li>  <router-link to="/user/before-orderList">我的订单</router-link>  </li>
+                      <li>  <router-link to="/user/before-userInfo">账号资料</router-link>  </li>
+                      <li>  <router-link to="/user/before-addressList">收货地址</router-link>  </li>
                       <li>  <a href="javascript:;" @click="_loginOut">退出</a>  </li>
                     </ul>
                   </div>
@@ -266,11 +265,11 @@ export default {
     },
     //去购物车
     toCart () {
-      this.$router.push({path: '/cart'})
+      this.$router.push({path: '/before-cart'})
     },
     // 控制顶部
       navFixed () {
-        if (this.$route.path === '/goods' || this.$route.path === '/main' || this.$route.path === '/goodsDetails' || this.$route.path === '/thanks') {
+        if (this.$route.path === '/before-goods' || this.$route.path === '/before-main' || this.$route.path === '/before-goodsDetails' || this.$route.path === '/thanks') {
           var st = document.documentElement.scrollTop || document.body.scrollTop
           st >= 100 ? this.st = true : this.st = false
           // 计算小圆当前位置
@@ -595,7 +594,12 @@ export default {
         &:before {
           left: 50%;
         }
-
+      }
+      .nav-user-list{
+        ul{
+          padding: 0;
+          margin: 0;
+        }
       }
     }
     .shop {

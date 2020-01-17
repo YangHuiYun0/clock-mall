@@ -41,9 +41,9 @@
 <script>
 //   import { productDet, addCart } from '/api/goods'
 //   import { mapMutations, mapState } from 'vuex'
-  import YShelf from '../components/shelf'
-  import BuyNum from '../components/buynum'
-  import YButton from '../components/yButton'
+  import YShelf from '../../components/shelf'
+  import BuyNum from '../../components/buynum'
+  import YButton from '../../components/yButton'
 //   import { getStore } from '/utils/storage'
   export default {
     data () {
@@ -129,7 +129,7 @@
   }
 </script>
 <style lang="scss" scoped>
-  @import "../assets/style/mixin";
+  @import "../../assets/style/mixin";
 
   .store-content {
     width: 100%;

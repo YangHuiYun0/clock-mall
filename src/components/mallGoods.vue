@@ -52,7 +52,7 @@
     //   },
       openProduct (id) {
          this.$router.push({
-           path:'goodsDetails',
+           path:'before-goodsDetails',
            query:{},
          })
       },

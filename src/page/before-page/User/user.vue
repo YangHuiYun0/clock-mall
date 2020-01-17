@@ -27,7 +27,7 @@
   </div>
 </template>
 <script>
-  import YHeader from '../../common/header'
+  import YHeader from '../../../common/header'
   import { mapState } from 'vuex'
   export default {
     components: {
@@ -37,9 +37,9 @@
       return {
         title: '我的订单',
         nav: [
-          {name: '我的订单', path: 'orderList'},
-          {name: '账户资料', path: 'information'},
-          {name: '收货地址', path: 'addressList'},
+          {name: '我的订单', path: 'before-orderList'},
+          {name: '账户资料', path: 'before-userInfo'},
+          {name: '收货地址', path: 'before-addressList'},
         ],
         editAvatar: true
       }
@@ -73,7 +73,7 @@
   }
 </script>
 <style lang="scss" scoped>
-  @import "../../assets/style/mixin";
+  @import "../../../assets/style/mixin";
    a{
     text-decoration:none;
   }

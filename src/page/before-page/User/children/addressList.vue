@@ -8,6 +8,7 @@
     <div class="table">
       <el-table :data="tableData" v-loading="dataListLoading">
         <el-table-column
+          label="排序"
           type="index"
           width="50">
         </el-table-column>
@@ -26,8 +27,18 @@
             {{scope.row.receiverAddress}}
           </template>
         </el-table-column>
+        <el-table-column prop="receiverAddress" label="详细地址" align="center">
+          <template slot-scope="scope">
+            {{scope.row.detailAddress}}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
+            <el-button :type="scope.row.status?'danger':'info'" plain 
+                        size="mini" @click="setDefault(scope.row,$index)"
+                        :disabled="scope.row.status?true:false">
+              {{scope.row.status?'默认地址':'设为默认'}}
+            </el-button>
             <el-button type="primary" size="mini" @click="addAddress(scope.row,$index)">编辑</el-button>
             <el-button type="danger" size="mini" @click="delAddress(scope.row,$index)">删除</el-button>
           </template>
@@ -46,7 +57,7 @@
              :before-close="beforeClose"
              :visible.sync="dialogVisible"
              :modal-append-to-body='false'
-             width='500px'>
+             width='40%'>
         <el-form :model="addressForm" ref="addressForm" :rules="rules">
           <el-form-item label="收件人名称" prop="receiverName">
             <el-input v-model="addressForm.receiverName" show-word-limit maxlength=6
@@ -56,9 +67,18 @@
             <el-input v-model="addressForm.receiverPhone" show-word-limit maxlength=11
                       clearable style="width:300px"></el-input>
           </el-form-item>
-          <el-form-item label="收件人地址" prop="receiverAddress">
-            <el-input v-model="addressForm.receiverAddress" show-word-limit maxlength=25
-                      clearable style="width:300px"></el-input>
+          <el-form-item label="收件人地址" prop="selectedOptions">
+            <el-cascader :options="options" 
+                          v-model="addressForm.selectedOptions" 
+                          @change="handleChange" 
+                          style="width:300px"
+                          ref='myCascader'
+                          ></el-cascader>
+          </el-form-item>
+          <el-form-item label="详细地址" prop="detailAddress" >
+            <el-input type="textarea" :autosize="{ minRows: 4}" v-model="addressForm.detailAddress"
+                      show-word-limit maxlength=50
+                      placeholder="例如：街道、门牌号"></el-input>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -70,8 +90,10 @@
 </template>
 
 <script>
-import YShelf from '../../../components/shelf'
-import YButton from "../../../components/yButton";
+import YShelf from '../../../../components/shelf'
+import YButton from "../../../../components/yButton";
+let pcas = require("../pcas/pca-code.json")
+
 export default {
   components:{
     YShelf,YButton
@@ -85,7 +107,7 @@ export default {
       }
     }
     return{
-      tableData:[],
+      tableData:[{status:1},{status:0}],
       dataListLoading:false,
       page: 0,
       pageSize: 20,
@@ -97,7 +119,10 @@ export default {
         receiverName:'',
         receiverPhone:'',
         receiverAddress:'',
+        detailAddress:'',
+        selectedOptions:[],
       },
+      options: pcas,
       rules:{
         receiverName:[
           {required: true, message: '请输入收件人名称', trigger: 'blur'}
@@ -109,6 +134,12 @@ export default {
           {required: true, message: '请输入收件人号码', trigger: 'blur'},
           { required: true, trigger: 'change', validator: phoneRequire }
         ],
+        detailAddress:[
+          {required: true, message: '请输入详细地址', trigger: 'blur'}
+        ],
+        selectedOptions:[
+           {required: true, message: '请选择地址', trigger: 'blur'}
+        ]
       }
     }
   },
@@ -129,7 +160,26 @@ export default {
         })
       }
     },
-    delAddress(row,index){},
+    delAddress(row,index){
+      const that = this;
+      this.$confirm(`确定对该收货地址进行「 删除 」操作?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delAddressInfo(id).then(res=>{
+          if(res && res.code === 200){
+            that.$message.success(`删除地址成功`);
+            that.tableData.splice(index, 1);
+          }else{
+            that.$message.error(res.msg)
+          }
+        })
+      }).catch(()=>{});
+    },
+    setDefault(row,index){
+      if(row.status) return;
+    },
     getDataList(type){
       if (type === 'init') {
         this.page = 0;
@@ -188,6 +238,9 @@ export default {
         })
       })
     },
+    handleChange(value){
+      this.addressForm.receiverAddress = this.$refs.myCascader.getCheckedNodes()[0].pathLabels.join('');
+    }
   },
   
 }

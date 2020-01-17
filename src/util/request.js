@@ -5,7 +5,8 @@ import { clearLoginInfo } from './index';
 import { getToken } from '../util/auth';
 import { Message } from 'element-ui';
 
-const BASE_API = 'http://192.168.0.106:9090'
+// const BASE_API = 'http://192.168.0.106:9090'
+const BASE_API = 'http://47.106.70.5:9595';   //服务器
 // 创建 axios 实例
 const service = axios.create({
   baseURL: BASE_API, // 请求地址公共部分
