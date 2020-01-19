@@ -36,7 +36,7 @@
                           <span class="avatar" :style="{backgroundImage:'url(../../static/images/user-avatar)'}">
                           </span>
                         </div>
-                        <p class="name">{{userInfo.info.username}}</p>
+                        <!-- <p class="name">{{userInfo.info.username}}</p> -->
                       </li>
                       <li>  <router-link to="/user/before-orderList">我的订单</router-link>  </li>
                       <li>  <router-link to="/user/before-userInfo">账号资料</router-link>  </li>
@@ -149,7 +149,7 @@ export default {
       timeout: null,
       token: '',
       navList: [],
-      userInfo:{info:{username:'嘻嘻嘻嘻'}},
+      // userInfo:{info:{username:'嘻嘻嘻嘻'}},
       // receiveInCart: false, // 是否进入购物车
       // showCart: false, // 是否显示购物车
       cartList: [{productNum:1}],   // 加入购物车列表
@@ -157,7 +157,7 @@ export default {
   },
   computed: {
     ...mapState([
-         'login', 'receiveInCart', 'showCart', 
+         'login', 'receiveInCart', 'showCart','userInfo' 
       ]),//todo  记得补上'userInfo' 'cartList',
     // 计算价格
     totalPrice () {
@@ -175,6 +175,9 @@ export default {
       })
       return totalNum
     }
+  },
+  mounted(){
+          console.log('用户数据',this.$store.state.userInfo) ;
   },
   methods:{
      ...mapMutations(['ADD_CART', 'INIT_BUYCART', 'ADD_ANIMATION', 'SHOW_CART', 'REDUCE_CART', 'RECORD_USERINFO', 'EDIT_CART']),

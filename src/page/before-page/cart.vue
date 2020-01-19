@@ -129,7 +129,7 @@ export default {
     checkout () {
       this.checkoutNow = '结算中...'
       this.submit = false
-      this.$router.push({path: 'checkout'})
+      this.$router.push({path: '/before-checkout'})
     },
     //删除选中的商品
     delChecked(){},

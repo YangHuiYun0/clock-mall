@@ -34,10 +34,10 @@
         </el-table-column>
         <el-table-column label="操作" align="center">
           <template slot-scope="scope">
-            <el-button :type="scope.row.status?'danger':'info'" plain 
+            <el-button :type="scope.row.isDefault?'danger':'info'" plain 
                         size="mini" @click="setDefault(scope.row,$index)"
-                        :disabled="scope.row.status?true:false">
-              {{scope.row.status?'默认地址':'设为默认'}}
+                        :disabled="scope.row.isDefault?true:false">
+              {{scope.row.isDefault?'默认地址':'设为默认'}}
             </el-button>
             <el-button type="primary" size="mini" @click="addAddress(scope.row,$index)">编辑</el-button>
             <el-button type="danger" size="mini" @click="delAddress(scope.row,$index)">删除</el-button>
@@ -115,12 +115,13 @@ export default {
       dialogVisible:false,
       submitLoading:false,
       addressForm:{
-        id:'',
+        addressId:'',
         receiverName:'',
         receiverPhone:'',
         receiverAddress:'',
         detailAddress:'',
         selectedOptions:[],
+        isDefault:''//是否为默认
       },
       options: pcas,
       rules:{
@@ -149,9 +150,9 @@ export default {
   methods:{
     addAddress(row,index){
       this.dialogVisible = true;
-      if(row && row.id){
+      if(row && row.addressId){
         const that = this;
-        getAddressInfo(row.id).then(res =>{
+        getAddressInfo(row.addressId).then(res =>{
           if(res && res.code === 200 ){
             that.addressForm = res.body;
           }
@@ -167,7 +168,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delAddressInfo(id).then(res=>{
+        delAddressInfo(row.addressId).then(res=>{
           if(res && res.code === 200){
             that.$message.success(`删除地址成功`);
             that.tableData.splice(index, 1);
@@ -220,13 +221,13 @@ export default {
           this.$message.error('请填写完整再保存');
           return false;
         }
-        const submitFun = that.addressForm.id ?editAddress:addAddress;
-        submitFun(that.addressForm.id,that.addressForm).then(res=>{
+        const submitFun = that.addressForm.addressId ?editAddress:addAddress;
+        submitFun(that.addressForm.addressId,that.addressForm).then(res=>{
           console.log('res',res);
           if(res&&res.code ===200){
             this.$message({
               type: 'success',
-              message: `${that.addressForm.id?'修改':'增加'}成功`
+              message: `${that.addressForm.addressId?'修改':'增加'}成功`
             });
             that.$refs.addressForm.resetFields();
             that.getDataList();

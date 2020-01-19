@@ -112,7 +112,7 @@
         }
       },
       checkout (productId) {
-        this.$router.push({path: '/checkout', query: {productId, num: this.productNum}})
+        this.$router.push({path: '/before-checkout', query: {productId, num: this.productNum}})
       },
       editNum (num) {
         this.productNum = num
