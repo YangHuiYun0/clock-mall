@@ -5,7 +5,7 @@
     <el-card>
       <div style="margin-bottom:20px">
         <el-button  type="primary" class="el-icon-plus" size="small"
-                  @click="addBanner()">增加轮播图</el-button><span class="tip">&nbsp;&nbsp;最多5条</span>
+                  @click="addBanner()" :disabled="bannerData.length > 4">增加轮播图</el-button><span class="tip">&nbsp;&nbsp;最多5条</span>
       </div>
       <el-table :data="bannerData" v-loading="dataListLoading" ref="eltable">
         <el-table-column label="序号"  type="index"  width="50" align="center">
@@ -43,7 +43,7 @@
           <template slot-scope="scope"> 
             <!--编辑 删除 -->
             <i class="el-icon-edit"  @click="addBanner(scope.row.id);"></i> 
-            <i class="el-icon-delete" @click="delBanner(scope.row.id,scope.row.name,scope.$index);"></i>
+            <i class="el-icon-delete" @click="delBanner(scope.row,scope.$index);"></i>
           </template>
         </el-table-column>
       </el-table>
@@ -53,7 +53,7 @@
 </template>
 
 <script>
-import { getBannerList, } from "../../../api/home-set";
+import { getBannerList,delBannerInfo } from "../../../api/home-set";
 export default {
   data(){
     return{
@@ -90,16 +90,16 @@ export default {
       });
     },
     //删除轮播图
-    delBanner(id,name,index){
+    delBanner(row,index){
       const that = this;
-      this.$confirm(`确定对「 ${name} 」进行「 删除 」操作?`, '提示', {
+      this.$confirm(`确定对「 ${row.bannerName} 」进行「 删除 」操作?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delBanner(id).then(res=>{
+        delBannerInfo(row.id).then(res=>{
           if(res && res.code === 200){
-            that.$message.success(`删除轮播图 ${name} 成功`);
+            that.$message.success(`删除轮播图 ${row.bannerName} 成功`);
             that.bannerData.splice(index, 1);
           }else{
             that.$message.error(res.msg)

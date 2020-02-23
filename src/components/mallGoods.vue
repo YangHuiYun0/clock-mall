@@ -4,12 +4,11 @@
     <div style="">
       <div class="good-img">
         <a @click="openProduct(msg.id)">
-          <!-- <img v-lazy="msg.goodsUrl" :alt="msg.goodsName" :key="msg.goodsUrl"> -->
-          <img src="./image/c-1.jpg">
+          <img :src="msg.goodsUrl">
         </a>
       </div>
       <h6 class="good-title" v-html="msg.goodsName">{{msg.goodsName}}</h6>
-      <h3 class="sub-title ellipsis">{{msg.subTitle}}</h3>
+      <h3 class="sub-title ellipsis">{{msg.goodsDesc}}</h3>
       <div class="good-price pr">
         <div class="ds pa">
           <a @click="openProduct(msg.id)">
@@ -28,44 +27,48 @@
 </template>
 <script>
   import YButton from '../components/yButton'
-  // import { addCart } from '/api/goods.js'
+  import { joinCart } from '../api/before-goods'
   import { mapMutations, mapState } from 'vuex'
   import { getStore } from '../util/storage'
   export default {
     props: {
-      msg: {
-        goodsPrice: 0
-      }
+      msg:''
     },
     data () {
       return {
         
       }
     },
+    mounted(){
+      console.log('商品数据',this.msg);
+      
+    },
     computed: {
       ...mapState(['login', 'showMoveImg', 'showCart'])
     },
     methods: {
       ...mapMutations(['ADD_CART', 'ADD_ANIMATION', 'SHOW_CART']),
-    //   goodsDetails (id) {
-    //     this.$router.push({path: 'goodsDetails/productId=' + id})
-    //   },
       openProduct (id) {
          this.$router.push({
            path:'before-goodsDetails',
-           query:{},
+           query:{id},
          })
       },
       addCart (id, price, name, img) {
         if (!this.showMoveImg) {     // 动画是否在运动
-          // if (this.login) { // 登录了 直接存在用户名下
-          //   addCart({userId: getStore('userId'), id: id, productNum: 1}).then(res => {
-          //     // 并不重新请求数据
-          //     this.ADD_CART({productId: id, goodsPrice: price, goodsName: name, goodsUrl: img})
-          //   })
-          // } else { // 未登录 vuex
-          //   this.ADD_CART({id: id, goodsPrice: price, goodsName: name, goodsUrl: img})
-          // }
+            joinCart({
+              buyCounts: 1,
+              goodsId: id,
+              goodsName: name,
+              goodsPrice: price,
+              goodsUrl: img,
+            }).then(res =>{
+              if(res && res.code === 200){
+                this.$message.success('加入购物车成功');
+              }else{
+                 this.$message.error(res.msg)
+              }
+            })
           // 加入购物车动画
           var dom = event.target
           // 获取点击的坐标

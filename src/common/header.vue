@@ -10,15 +10,15 @@
           </div>
           <div class="right-box">
             <div class="nav-list">
-              <el-autocomplete
+              <el-input
+              style="width:300px"
                 placeholder="请输入商品信息"
                 icon="search"
                 v-model="input"
-                :fetch-suggestions="querySearchAsync"
                 @select="handleSelect"
                 :on-icon-click="handleIconClick"
                 @keydown.enter.native="handleIconClick">
-              </el-autocomplete>
+              </el-input>
               <router-link to="/before-goods"><a @click="changePage(2)">全部商品</a></router-link>
               <router-link to="/before-main"><a @click="changePage(4)">首页</a></router-link>
               <router-link to="/login"><a @click="changePage(5)">管理员权限</a></router-link>
@@ -33,10 +33,10 @@
                       <!--头像-->
                       <li class="nav-user-avatar">
                         <div>
-                          <span class="avatar" :style="{backgroundImage:'url(../../static/images/user-avatar)'}">
+                          <span class="avatar" :style="{backgroundImage:'url('+userUrl+')'}">
                           </span>
                         </div>
-                        <!-- <p class="name">{{userInfo.info.username}}</p> -->
+                        <p class="name">{{name}}</p>
                       </li>
                       <li>  <router-link to="/user/before-orderList">我的订单</router-link>  </li>
                       <li>  <router-link to="/user/before-userInfo">账号资料</router-link>  </li>
@@ -46,9 +46,9 @@
                   </div>
                 </div>
               </div>
-              <div class="shop pr" @mouseover="cartShowState(true)" @mouseout="cartShowState(false)"
+              <div class="shop pr" @mouseover="cartShowState(true)" @mouseout="cartShowState(false)" 
                    ref="positionMsg">
-                <router-link to="/cart"></router-link>
+                <router-link to="/before-cart"></router-link>
                 <span class="cart-num">
                   <i class="num" :class="{no:totalNum <= 0,move_in_cart:receiveInCart}">{{totalNum}}</i></span>
                 <!--购物车显示块-->
@@ -57,26 +57,26 @@
                     <div class="full" v-show="totalNum">
                       <!--购物列表-->
                       <div class="nav-cart-items">
-                        <ul>
+                        <ul style="margin-left: -20px;">
                           <li class="clearfix" v-for="(item,i) in cartList" :key="i">
                             <div class="cart-item">
                               <div class="cart-item-inner">
-                                <a @click="openProduct(item.productId)">
+                                <a @click="openProduct(item.id)">
                                   <div class="item-thumb">
-                                    <img :src="item.productImg">
+                                    <img :src="item.goodsUrl">
                                   </div>
                                   <div class="item-desc">
                                     <div class="cart-cell"><h4>
-                                      <a href="" v-text="item.productName"></a>
+                                      <a href="" v-text="item.goodsName"></a>
                                     </h4>
                                       <!-- <p class="attrs"><span>白色</span></p> -->
                                       <h6><span class="price-icon">¥</span><span
-                                        class="price-num">{{item.salePrice}}</span><span
-                                        class="item-num">x {{item.productNum}}</span>
+                                        class="price-num">{{item.goodsPrice}}</span><span
+                                        class="item-num">x {{item.buyCounts}}</span>
                                       </h6></div>
                                   </div>
                                 </a>
-                                <div class="del-btn del" @click="delGoods(item.productId)">删除</div>
+                                <div class="del-btn del" @click="delGoods(item)">删除</div>
                               </div>
                             </div>
                           </li>
@@ -113,7 +113,7 @@
                   <router-link to="/"><a @click="changGoods(-1)" :class="{active:choosePage===-1}">首页</a></router-link>
                 </li>
                 <li>
-                  <a @click="changGoods(-2)" :class="{active:choosePage===-2}">全部</a>
+                  <router-link to="/before-goods"><a @click="changGoods(-2)" :class="{active:choosePage===-2}">全部</a></router-link>
                 </li>
               </ul>
               <div></div>
@@ -128,13 +128,20 @@
 import { mapMutations, mapState } from 'vuex'
 import YShelf from "../components/shelf";
 import YButton  from "../components/yButton";
+import { getCartList ,delCartInfo} from "../api/before-goods";
+import Cookies from 'js-cookie';
+import { getMember } from "../api/member-manage";
+import { getLogout } from "@/api/login";
+
 export default {
   name:'headTop',
   components:{
     YShelf,YButton
   },
+
   data () {
     return {
+      userData:{},
       user: {},
       // 查询数据库的商品
       st: false,
@@ -149,21 +156,20 @@ export default {
       timeout: null,
       token: '',
       navList: [],
-      // userInfo:{info:{username:'嘻嘻嘻嘻'}},
-      // receiveInCart: false, // 是否进入购物车
-      // showCart: false, // 是否显示购物车
-      cartList: [{productNum:1}],   // 加入购物车列表
+      cartList: [],   // 加入购物车列表
+      name:'',
+      userUrl:'',
     }
   },
   computed: {
     ...mapState([
          'login', 'receiveInCart', 'showCart','userInfo' 
-      ]),//todo  记得补上'userInfo' 'cartList',
+      ]),
     // 计算价格
     totalPrice () {
       var totalPrice = 0
       this.cartList && this.cartList.forEach(item => {
-        totalPrice += (item.productNum * item.salePrice)
+        totalPrice += (item.buyCounts * item.goodsPrice)
       })
       return totalPrice
     },
@@ -171,50 +177,45 @@ export default {
     totalNum () {
       var totalNum = 0
       this.cartList && this.cartList.forEach(item => {
-        totalNum += (item.productNum)
+        totalNum += (item.buyCounts)
       })
       return totalNum
     }
   },
-  mounted(){
-          console.log('用户数据',this.$store.state.userInfo) ;
+  watch: {
+    showCart:function(newVal,oldVal){
+      if(newVal && this.userData){
+        this.getCartInfo();
+      }
+    },
   },
   methods:{
      ...mapMutations(['ADD_CART', 'INIT_BUYCART', 'ADD_ANIMATION', 'SHOW_CART', 'REDUCE_CART', 'RECORD_USERINFO', 'EDIT_CART']),
     //点击搜索框
     handleIconClick (ev) {
-        if (this.$route.path === '/search') {
-          this.$router.push({
-            path: '/refreshsearch',
-            query: {
-              key: this.input
-            }
-          })
-        } else {
-          this.$router.push({
-            path: '/search',
-            query: {
-              key: this.input
-            }
-          })
-        }
+      if(this.input){
+        this.$router.push({
+          path: '/before-goods',
+          query: {
+            key: this.input
+          }
+        })
+      }else{
+        this.$router.replace({
+          path:'/refresh'
+        }) ;
+      }
+
       },
-    querySearchAsync (queryString, cb) {
-      if (this.input === undefined) {
-        cb([])
-        return
-      }
-      this.input = this.input.trim()
-      if (this.input === '') {
-        cb([])
-        return
-      } else {
-        this.loadAll()
-        setTimeout(() => {
-          cb(this.searchResults)
-        }, 300)
-      }
-    },
+      //获取购物车列表
+      getCartInfo(){
+        getCartList().then(res =>{
+          if(res &&res.code === 200){
+            this.cartList = res.data;
+          }
+        })
+      },
+  
     handleSelect (item) {
       this.input = item.value
     },
@@ -256,15 +257,12 @@ export default {
     },
     // 退出登陆
     _loginOut () {
-      let params = {
-        params: {
-          token: this.token
-        }
-      }
-      // loginOut(params).then(res => {
-      //   removeStore('buyCart')
-      //   window.location.href = '/'
-      // })
+      // let params = {
+      //   params: {
+      //     token: this.token
+      //   }
+      // }
+      getLogout().then()
     },
     //去购物车
     toCart () {
@@ -289,20 +287,50 @@ export default {
       this.choosePage = v
     },
     // 删除商品
-    delGoods (productId) {
-      // if (this.login) { // 登陆了
-      //   cartDel({userId: getStore('userId'), productId}).then(res => {
-      //     this.EDIT_CART({productId})
-      //   })
-      // } else {
-      //   this.EDIT_CART({productId})
-      // }
+    delGoods (item) {
+      if(this.userData){
+        const that = this;
+        this.$confirm(`确定对「 ${item.goodsName} 」进行「 删除 」操作?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          delCartInfo(item.goodsId).then(res=>{
+            if(res && res.code === 200){
+              that.$message.success(`删除商品 ${item.goodsName} 成功`);
+              that.getCartInfo();
+              that.$router.replace({
+                  path:'/refresh'
+                }) ;
+            }else{
+              that.$message.error(res.msg)
+            }
+          })
+        }).catch(()=>{});
+      }else{
+        this.$router.push({path:'/login'})
+      }
     },
   },
   mounted(){
+    this.userData = Cookies.get('userData');
+    if(this.userData){
+      this.getCartInfo();
+      this.id = this.userData.split(',')[0].split(':')[1];
+      this.id =this.id.replace(/\"/g, "");
+      getMember(this.id).then(res =>{
+        if(res && res.code === 200){
+          this.name = res.data.name;
+          this.userUrl = res.data.userImgUrl;
+        }
+      })
+    }
     this.navFixed();
-    window.addEventListener('scroll', this.navFixed)
-    window.addEventListener('resize', this.navFixed)
+    window.addEventListener('scroll', this.navFixed);
+    window.addEventListener('resize', this.navFixed);
+    if (typeof (this.$route.query.key) !== undefined) {
+      this.input = this.$route.query.key
+    }
   },
 }
 </script>
@@ -646,7 +674,7 @@ export default {
         display: block;
         margin-left: 31px;
         margin-top: -1px;
-        min-width: 30px;
+        min-width: 20px;
         text-indent: 0;
         line-height: 20px;
         > i {
@@ -742,7 +770,7 @@ export default {
         }
         .item-desc {
           margin-left: 98px;
-          display: table;
+          // display: table;
           @include wh(205px, 80px);
           h4 {
             color: #000;
@@ -941,7 +969,6 @@ export default {
     }
     .nav-sub-wrapper {
       padding: 31px 0;
-      height: 90px;
       position: relative;
       &.fixed {
         padding: 0;

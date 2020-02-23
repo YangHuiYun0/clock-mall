@@ -53,6 +53,7 @@
     </el-card>
      <el-dialog
       title="添加退货原因"
+      :before-close="beforeClose"
       :visible.sync="dialogVisible" width="30%">
       <el-form :model="returnReason" :rules="rules"
                ref="reasonForm" label-width="150px">
@@ -188,13 +189,23 @@ export default {
     addCause(index, row){
       if(row){
         this.returnReason = row;
+      }else{
+        const _reason = new Object()
+        _reason.causeName = '';
+        _reason.sort = '';
+        _reason.id = '';
+        this.returnReason = _reason;
       }
       this.dialogVisible = true;
     },
     //关闭弹窗
     cancel(){
-      dialogVisible = false;
-      this.returnReason = {};
+      this.dialogVisible = false;
+      // this.returnReason.causeName = '';
+      // this.returnReason.sort = '';
+    },
+    beforeClose(){
+      this.cancel();
     },
     // 保存弹窗内容
     submitForm(){
@@ -210,8 +221,9 @@ export default {
           console.log('res:',res);
           if(res && res.code === 200){
             that.$message.success(that.returnReason.id ? '修改成功' : '保存成功');
-            that.dialogVisible = false;
+            // that.dialogVisible = false;
             that.getDataList('init');
+            that.cancel();
           }else{
             that.$message.error(res.msg)
           }

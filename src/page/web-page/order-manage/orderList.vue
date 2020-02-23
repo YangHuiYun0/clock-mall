@@ -36,9 +36,9 @@
             {{formatTime(scope.row.createTime)}}
           </template>
         </el-table-column>
-        <el-table-column label="购买用户" align="center" prop="buyUser" >
+        <el-table-column label="购买用户" align="center" prop="customerName" >
           <template slot-scope="scope">
-            {{scope.row.buyUser}}
+            {{scope.row.customerName}}
           </template>
         </el-table-column>
         <el-table-column label="订单金额" align="center" prop="orderAmount" >
@@ -54,26 +54,29 @@
         <el-table-column label="操作" width="250" align="center">
           <template slot-scope="scope">
             <el-button
+              type="primary"
               size="mini"
               @click="handleViewOrder(scope.$index, scope.row)"
             >查看订单</el-button>
-            <el-button
+            <!-- <el-button
+              type="warning"
               size="mini"
-              @click="handleCloseOrder(scope.$index, scope.row)"
-              v-show="scope.row.status===0">关闭订单</el-button>
+              @click="handleRefundOrder(scope.$index, scope.row)"
+              v-show="scope.row.status===3">同意退款</el-button> -->
             <el-button
+              type="warning"
               size="mini"
               @click="handleDeliveryOrder(scope.$index, scope.row)"
-              v-show="scope.row.status===1">填写发货信息</el-button>
-            <el-button
+              v-show="scope.row.status===0">填写发货信息</el-button>
+            <!-- <el-button
               size="mini"
               @click="handleViewLogistics(scope.$index, scope.row)"
-              v-show="scope.row.status===2||scope.row.status===3">订单跟踪</el-button>
-            <el-button
+              v-show="scope.row.status===1">订单跟踪</el-button> -->
+            <!-- <el-button
               size="mini"
               type="danger"
               @click="handleDeleteOrder(scope.$index, scope.row)"
-              v-show="scope.row.status===4">删除订单</el-button>
+              v-show="scope.row.status===4||scope.row.status===2">删除订单</el-button> -->
           </template>
         </el-table-column>
       </el-table>
@@ -118,6 +121,8 @@
 
 <script>
 import { formatTime } from "../../../util/time";
+import { getOrdersList,setDeliveryCode } from "../../../api/order-manage";
+import { editOrderStatus } from "../../../api/user";
 export default {
   data(){
     const deliverySnRequire = (rule, value, callback) => {
@@ -143,7 +148,7 @@ export default {
         { label: '已关闭', value: 4}
       ],
       dataListLoading:false,
-      orderData:[{status:1}],
+      orderData:[],
       listItem:[],
       rules:{
         deliverySn:[
@@ -154,25 +159,23 @@ export default {
     }
   },
   mounted(){
-    // this.getDataList('init');
+    this.getDataList('init');
   },
   methods:{
     formatTime(timestmap) {
       return formatTime(timestmap, 'YY-MM-DD hh:mm:ss');
     },
     formatStatus(value) {
-      if (value === 1) {
+      if (value === 0) {
         return '待发货';
-      } else if (value === 2) {
+      } else if (value === 1) {
         return '已发货';
-      } else if (value === 3) {
+      } else if (value === 2) {
         return '已完成';
+      } else if (value === 3) {
+        return '退款中';
       } else if (value === 4) {
-        return '已关闭';
-      } else if (value === 5) {
-        return '无效订单';
-      } else {
-        return '待付款';
+        return '已退款';
       }
     },
     currentChangeHandle(val){
@@ -184,12 +187,12 @@ export default {
       }
       this.dataListLoading = true;
       const that = this;
-      getBrandList({
+      getOrdersList({
         page:that.page,
         size:that.pageSize,
         orderCode:that.orderCode,
-        createTime:that.createTime,
-        orderStatus:that.orderStatus,
+        date: that.createTime ? new Date(that.createTime).getTime():'' ,
+        status:that.orderStatus,
       }).then(res=>{
         if(res && res.code === 200){
           that.orderData = res.data.rows;
@@ -238,7 +241,7 @@ export default {
           receiverName:order.receiverName,
           receiverPhone:order.receiverPhone,
           receiverAddress:order.receiverAddress,
-          deliverySn:null
+          deliverySn:null,
         };
         return listItem;
       },
@@ -257,7 +260,9 @@ export default {
           return false;
         }
         that.submitLoading = true;
-        submitFun(that.listItem).then(res =>{
+        setDeliveryCode(that.listItem.orderId,{
+          code:that.listItem.deliverySn
+        }).then(res =>{
           if(res && res.code === 200){
             that.$message.success('商品发货成功');
             that.dialogVisible = false;
@@ -271,6 +276,19 @@ export default {
         that.submitLoading = false;
       });
     },
+    handleRefundOrder(index,row){
+      const that = this;
+        editOrderStatus(row.id,{
+          status:row.status+1
+        }).then(res =>{
+          if(res && res.code === 200){
+            that.$message.success(res.msg);
+            that.getDataList('init');
+          }else{
+            that.$message.error(res.msg)
+          }
+        })
+    }
   },
 }
 </script>

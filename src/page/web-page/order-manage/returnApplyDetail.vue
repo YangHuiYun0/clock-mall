@@ -5,11 +5,11 @@
       <el-card>
         <span class="font-title-medium">退货商品</span>
         <el-table
-          border
+          
           class="standard-margin"
           ref="productTable"
-          :data="productList">
-          <el-table-column label="商品图片" width="160" align="center">
+          :data="orderReturnApply.goodsList">
+          <el-table-column label="商品图片"  align="center">
             <template slot-scope="scope">
               <img style="height:80px" :src="scope.row.goodsUrl">
             </template>
@@ -17,28 +17,24 @@
           <el-table-column label="商品名称" align="center">
             <template slot-scope="scope">
               <span class="font-small">{{scope.row.goodsName}}</span><br>
-              <span class="font-small">品牌：{{scope.row.productBrand}}</span>
+              <span class="font-small">品牌：{{scope.row.brandName}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="价格/货号" width="180" align="center">
+          <el-table-column label="价格" align="center">
             <template slot-scope="scope">
               <span class="font-small">价格：￥{{scope.row.goodsPrice}}</span><br>
-              <span class="font-small">货号：NO.{{scope.row.goodBrand}}</span>
             </template>
           </el-table-column>
-          <el-table-column label="属性" width="180" align="center">
-            <template slot-scope="scope">{{scope.row.productAttr}}</template>
-          </el-table-column>
-          <el-table-column label="数量" width="100" align="center">
+          <el-table-column label="数量" align="center">
             <template slot-scope="scope">{{scope.row.buyQuantity}}</template>
           </el-table-column>
-          <el-table-column label="小计" width="100" align="center">
-            <template slot-scope="scope">￥{{totalAmount}}</template>
+          <el-table-column label="小计" align="center">
+            <template slot-scope="scope">￥{{scope.row.goodsPrice*scope.row.buyQuantity}}</template>
           </el-table-column>
         </el-table>
         <div style="float:right;margin-top:15px;margin-bottom:15px">
           <span class="font-title-medium">合计：</span>
-          <span class="font-title-medium color-danger">￥{{totalAmount}}</span>
+          <span class="font-title-medium color-danger">￥{{orderReturnApply.orderAmount}}</span>
         </div>
       </el-card>
       <el-card shadow="never" class="standard-margin">
@@ -48,21 +44,17 @@
             <el-col :span="6" class="form-border form-left-bg font-small">订单单号</el-col>
             <el-col class="form-border font-small" :span="18">{{orderReturnApply.orderCode}}</el-col>
           </el-row>
-          <el-row>
-            <el-col class="form-border form-left-bg font-small" :span="6">申请状态</el-col>
-            <el-col class="form-border font-small" :span="18">{{formatStatus(orderReturnApply.status )}}</el-col>
-          </el-row>
            <el-row>
           <el-col class="form-border form-left-bg font-small" :span="6">用户账号</el-col>
-          <el-col class="form-border font-small" :span="18">{{orderReturnApply.buyUser}}</el-col>
+          <el-col class="form-border font-small" :span="18">{{orderReturnApply.customerLoginName}}</el-col>
         </el-row>
         <el-row>
           <el-col class="form-border form-left-bg font-small" :span="6">联系人</el-col>
-          <el-col class="form-border font-small" :span="18">{{orderReturnApply.memberName}}</el-col>
+          <el-col class="form-border font-small" :span="18">{{orderReturnApply.customerName}}</el-col>
         </el-row>
         <el-row>
           <el-col class="form-border form-left-bg font-small" :span="6">联系电话</el-col>
-          <el-col class="form-border font-small" :span="18">{{orderReturnApply.memberPhone}}</el-col>
+          <el-col class="form-border font-small" :span="18">{{orderReturnApply.customerPhone}}</el-col>
         </el-row>
         <el-row>
           <el-col class="form-border form-left-bg font-small" :span="6">退货原因</el-col>
@@ -70,11 +62,11 @@
         </el-row>
         <el-row>
           <el-col class="form-border form-left-bg font-small" :span="6">问题描述</el-col>
-          <el-col class="form-border font-small" :span="18">{{orderReturnApply.description}}</el-col>
+          <el-col class="form-border font-small" :span="18">{{orderReturnApply.causeDesc}}</el-col>
         </el-row>
          <el-row>
           <el-col class="form-border form-left-bg font-small" :span="6">订单金额</el-col>
-          <el-col class="form-border font-small" :span="18">￥{{totalAmount}}</el-col>
+          <el-col class="form-border font-small" :span="18">￥{{orderReturnApply.orderAmount}}</el-col>
         </el-row>
          <el-row>
           <el-col class="form-border form-left-bg font-small" :span="6">收货人姓名</el-col>
@@ -93,12 +85,8 @@
           <el-col class="form-border font-small" :span="18">{{formatTime(orderReturnApply.updateTime)}}</el-col>
         </el-row>
         </div>
-        <div style="margin-top:15px;text-align: center" v-show="orderReturnApply.status===0">
-          <el-button type="primary" size="small" @click="handleUpdateStatus(1)">确认退货</el-button>
-          <el-button type="danger" size="small" @click="handleUpdateStatus(3)">拒绝退货</el-button>
-        </div>
-        <div style="margin-top:15px;text-align: center" v-show="orderReturnApply.status===1">
-          <el-button type="primary" size="small" @click="handleUpdateStatus(2)">确认收货</el-button>
+        <div style="margin-top:15px;text-align: center">
+          <el-button type="primary" size="small" @click="handleUpdateStatus()">确认退货</el-button>
         </div>
       </el-card>
   </div>
@@ -106,41 +94,47 @@
 
 <script>
 import { formatTime } from "../../../util/time";
+import { getOrdersInfo } from "../../../api/order-manage";
+import { editOrderStatus } from "../../../api/user";
 export default {
   data(){
     return{
       breadCrumbList: [{ title: '退货列表', path: '/web-returnApply' }, { title: '退货详情' }],
+      id:this.$route.query.id || null,
       productList: null,
-      orderReturnApply:{
-        id:'11111',
-        status:0,
-        memberUsername:'HDH',
-        returnName:'虚修',
-        returnPhone:'1436346',
-        reason:'不想要',
-        description:'难用',
-        name:'到花覅哦豁',
-        detailAddress:'厦门，嗯',
-        phone:'534543'
-      },
-      totalAmount:'423432'
+      orderReturnApply:{},
     }
   },
+  mounted(){
+    this.getData();
+  },
   methods:{
-     formatTime(timestmap) {
+    getData(){
+      const that = this;
+      getOrdersInfo(this.id).then(res => {
+        if(res && res.code === 200){
+          that.orderReturnApply = res.data;
+        }else{
+          that.$message.error(res.msg)
+        }
+      })
+    },
+    formatTime(timestmap) {
       return formatTime(timestmap, 'YY-MM-DD hh:mm:ss');
     },
-    formatStatus(status){
-        if (status === 0) {
-          return "待处理";
-        } else if (status === 1) {
-          return "退货中";
-        } else if (status === 2) {
-          return "已完成";
-        } else {
-          return "已拒绝";
-        }
-      },
+    handleUpdateStatus(){
+      const that = this;
+      editOrderStatus(this.id,{
+          status: 4
+        }).then(res =>{
+          if(res && res.code === 200){
+            that.$message.success(res.msg);
+            this.$router.push({path: '/web-returnApply'})
+          }else{
+            that.$message.error(res.msg)
+          }
+        })
+    },
   }
 }
 </script>

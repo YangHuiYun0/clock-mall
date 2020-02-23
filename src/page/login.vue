@@ -96,6 +96,7 @@
 </template>
 
 <script>
+  import Cookies from 'js-cookie';
   import { getLogin } from "../api/login";
   import { addMember } from "../api/member-manage";
   import { setStore, getStore, removeStore } from '../util/storage.js'
@@ -190,6 +191,7 @@
               this.$message.success('登录成功');
               this.$router.push(res.data.userType?'before-main':'/web-home');
               setStore('userInfo', res.data)
+              Cookies.set("userData",  res.data);
             }else{
               this.$message.error(res.msg)
             }

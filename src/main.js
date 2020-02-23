@@ -23,7 +23,7 @@ Vue.config.productionTip = false
 Vue.use(ElementUI);
 
 
-// const whiteList = ['/home', '/before-goods', '/login', '/register', '/before-goodsDetails', '/thanks', '/search', '/refreshsearch', '/refreshgoods'] // 不需要登陆的页面
+// const whiteList = ['/home', '/before-goods', '/login', '/register', '/before-goodsDetails'] // 不需要登陆的页面
 // router.beforeEach(function (to, from, next) {
 //   let params = {
 //     params: {
@@ -52,5 +52,11 @@ new Vue({
   store,
   router,
   components: { App },
+  data: function(){
+    return {
+      checkoutrtList: [],
+      // userIamgeUrl:'/static/img/titImg.e6123b0.png',
+    }
+  },
   template: '<App/>'
 })

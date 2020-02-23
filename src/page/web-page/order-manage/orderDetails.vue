@@ -15,14 +15,14 @@
         <el-row>
           <el-col :span="6" class="table-cell-title">订单编号</el-col>
           <el-col :span="6" class="table-cell-title">快递单号</el-col>
-          <el-col :span="6" class="table-cell-title">用户账号</el-col>
+          <el-col :span="6" class="table-cell-title">用户名</el-col>
           <el-col :span="6" class="table-cell-title">订单状态</el-col>
         </el-row>
         <el-row>
           <el-col :span="6" class="table-cell">{{order.orderCode}}</el-col>
-          <el-col :span="6" class="table-cell">暂无</el-col>
-          <el-col :span="6" class="table-cell">{{order.buyUser}}</el-col>
-          <el-col :span="6" class="table-cell">{{formatStatus(order.status )}}</el-col>
+          <el-col :span="6" class="table-cell">{{order.deliverySn?order.deliverySn:'暂无'}}</el-col>
+          <el-col :span="6" class="table-cell">{{order.customerName}}</el-col>
+          <el-col :span="6" class="table-cell">{{formatStatus(order.status)}}</el-col>
         </el-row>
       </div>
       <div style="margin-top: 20px">
@@ -47,70 +47,85 @@
       </div>
        <el-table
         ref="orderItemTable"
-        :data="order.orderItemList"
+        :data="order.goodsList"
         style="width: 100%;margin-top: 20px" border>
-        <el-table-column label="商品图片" width="120" align="center">
+        <el-table-column label="商品图片"  align="center">
           <template slot-scope="scope">
-            <img :src="scope.row.goodsUrl" style="height: 80px">
+            <img :src="scope.row.goodsUrl" style="height: 100px;width:100px">
           </template>
         </el-table-column>
         <el-table-column label="商品名称" align="center">
           <template slot-scope="scope">
             <p>{{scope.row.goodsName}}</p>
-            <p>品牌：{{scope.row.goodBrand}}</p>
+            <p>品牌：{{scope.row.brandName}}</p>
           </template>
         </el-table-column>
-        <el-table-column label="价格/货号" width="120" align="center">
+        <el-table-column label="价格" align="center">
           <template slot-scope="scope">
             <p>价格：￥{{scope.row.goodsPrice}}</p>
-            <p>货号：{{scope.row.goodsCode}}</p>
           </template>
         </el-table-column>
-        <el-table-column label="属性" width="120" align="center">
-          <template slot-scope="scope">
-            {{scope.row.productAttr | formatProductAttr}}
-          </template>
-        </el-table-column>
-        <el-table-column label="数量" width="120" align="center">
+        <el-table-column label="数量"  align="center">
           <template slot-scope="scope">
             {{scope.row.buyQuantity}}
           </template>
         </el-table-column>
-        <el-table-column label="小计" width="120" align="center">
+        <el-table-column label="小计"  align="center">
           <template slot-scope="scope">
             ￥{{scope.row.goodsPrice*scope.row.buyQuantity}}
           </template>
         </el-table-column>
       </el-table>
-      <div style="float: right;margin: 20px">
-        合计：<span class="color-danger">￥{{order.totalAmount}}</span>
+      <div style="float: right;margin: 20px;font-size:24px;">
+        合计：<span class="color-danger">￥{{order.orderAmount}}</span>
       </div>
     </el-card>
   </div>
 </template>
 
 <script>
+import { getOrdersInfo } from "../../../api/order-manage";
 export default {
   data(){
     return{
+      id:this.$route.query.id || null,
       breadCrumbList: [{ title: '订单列表', path: '/web-orderList' }, { title: '订单详情' }],
       order: {},
     }
   },
+  mounted(){
+    this.getData();
+  },
   methods:{
+    getData(){
+      const that = this;
+      getOrdersInfo(this.id).then(res => {
+        if(res && res.code === 200){
+          that.order = res.data;
+        }else{
+          that.$message.error(res.msg)
+        }
+      })
+    },
     formatStatus(value) {
-      if (value === 1) {
-        return '待发货';
-      } else if (value === 2) {
-        return '已发货';
-      } else if (value === 3) {
-        return '已完成';
-      } else if (value === 4) {
-        return '已关闭';
-      } else if (value === 5) {
-        return '无效订单';
-      } else {
-        return '待付款';
+       switch (value) {
+        case 0:
+          return '未发货'
+          break;
+        case 1:
+          return '已发货'
+          break;
+        case 2:
+          return '已完成'
+          break;
+        case 3:
+          return '退款中'
+          break;
+        case 4:
+          return '已退款'
+          break;
+        default:
+          break;
       }
     },
   }
@@ -126,6 +141,7 @@ export default {
   }
   .color-danger{
     color: #f56c6c;
+    font-weight: 600;
   }
   .table-layout {
     margin-top: 20px;

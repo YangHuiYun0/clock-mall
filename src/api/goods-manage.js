@@ -87,3 +87,50 @@ export function getChildrenTypeList(code) {
       method:'get',
   })
 }
+
+// 获取节点信息
+
+export function getChildrenTypeInfo(code) {
+  return request({
+      url:`/category/code/${code}`,
+      method:'get',
+  })
+}
+
+export function getGoodsList(params) {
+  return request({
+    url: '/goods/list',
+    method: 'get',
+    params
+  });
+}
+//增加Goods
+export function addGoodsInfo(id,data) {
+  return request({
+      url:'/goods',
+      method:'post',
+      data
+  })
+}
+// 删除Goods
+export function delGoodsInfo(id) {
+  return request({
+      url:`/goods/${id}`,
+      method:'delete',
+  })
+}
+// 获取Goods
+export function getGoodsInfo(id) {
+  return request({
+      url:'/goods/'+id,
+      method:'get',
+  })
+}
+// 修改Goods
+export function editGoodsInfo(id,data) {
+  return request({
+      url:`/goods/${id}`,
+      method:'put',
+      data
+  })
+}

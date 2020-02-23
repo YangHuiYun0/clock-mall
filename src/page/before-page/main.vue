@@ -4,23 +4,19 @@
     <!-- 轮播图 -->
    <banner></banner>
    <!-- 卡片模块   --> 
-   <div v-for="(item,i) in home" :key="i">
-      <section class="w mt30 clearfix"  v-if="item.type === 2">
-        <y-shelf :title="item.name">
+   <div >
+      <section class="w mt30 clearfix" >
+        <y-shelf :title="'热门商品'">
           <div slot="content" class="hot">
-            <mall-goods :msg="iitem" v-for="(iitem,j) in item.panelContents" :key="j"></mall-goods>
+            <mall-goods :msg="iitem" v-for="(iitem,j) in hotGoodsList" :key="j"></mall-goods>
           </div>
         </y-shelf>
       </section>
 
-      <section class="w mt30 clearfix" v-if="item.type === 3">
-        <y-shelf :title="item.name">
+      <section class="w mt30 clearfix" v-for="(item, index) in brandGoodsList" :key="index">
+        <y-shelf :title="item.brandName" >
           <div slot="content" class="floors" >
-            <div class="imgbanner" v-for="(iitem,j) in item.panelContents" :key="j" v-if="iitem.type === 2 || iitem.type === 3" @click="linkTo(iitem)">
-              <img v-lazy="iitem.picUrl" >
-              <a class="cover-link"></a>
-            </div>
-            <mall-goods :msg="iitem" v-for="(iitem,j) in item.panelContents" :key="j+'key'" v-if="iitem.type != 2 && iitem.type != 3"></mall-goods>
+            <mall-goods :msg="iitem" v-for="(iitem,j) in item.goodsList" :key="j" ></mall-goods>
           </div>
         </y-shelf>
       </section>
@@ -32,6 +28,7 @@
 import banner from '../../components/banner'
 import YShelf from "../../components/shelf"; //卡片组件
 import mallGoods from "../../components/mallGoods";
+import { getHotGoodsList,getBrandGoodsList } from "../../api/before-goods";
 export default {
   components:{
     banner,
@@ -41,7 +38,6 @@ export default {
   data(){
     return{
       error: false,
-      
       mark: 0,
       bgOpt: {
         px: 0,
@@ -49,6 +45,8 @@ export default {
         w: 0,
         h: 0
       },
+      hotGoodsList:[],
+      brandGoodsList:[],
       home: [
         {
           created: 1523766787000,
@@ -116,8 +114,29 @@ export default {
   
   created () {
     // this.play()
+    this.getHotGoods();
+    this.getBrandGoods();
+    
   },
   methods: {
+    getHotGoods(){
+      const that = this;
+      getHotGoodsList({
+        limit:3
+      }).then(res =>{
+        if(res && res.code === 200){
+          that.hotGoodsList = res.data;
+        }
+      })
+    },
+    getBrandGoods(){
+       const that = this;
+        getBrandGoodsList().then(res =>{
+          if(res && res.code === 200){
+            that.brandGoodsList = res.data;
+          }
+        })
+    }
   }
 }
 </script>

@@ -35,11 +35,17 @@ const webmemberList = r => require.ensure([], () => r(require('@/page/web-page/m
 
 // ===================================登录页面路由=========================================
 const login = r => require.ensure([], () => r(require('@/page/login')), 'login');
+const refresh = r => require.ensure([], () => r(require('@/page/refresh')), 'refresh');
+
 const routes = [
 	{
     path:'/login',
     component:login
-	},
+  },
+  {
+    path:'/refresh',
+    component:refresh
+  },
 	// =================前台===================
 	{
 		path: '/',
@@ -126,6 +132,11 @@ const routes = [
 		]
 	}
 ]
+
+const routerPush = Router.prototype.push
+  Router.prototype.push = function push(location) {
+    return routerPush.call(this, location).catch(error=> error)
+}
 
 export default new Router({
 	routes,

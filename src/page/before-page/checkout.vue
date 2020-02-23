@@ -10,9 +10,9 @@
             <li v-for="(item,i) in addList"
                 :key="i"
                 class="address pr"
-                :class="{checked:addressId === item.addressId}"
-                @click="chooseAddress(item.addressId, item.receiverName, item.receiverPhone, item.receiverAddress)">
-           <span v-if="addressId === item.addressId" class="pa">
+                :class="{checked:id === item.id}"
+                @click="chooseAddress(item.id, item.receiverName, item.receiverPhone, item.receiverAddress)">
+           <span v-if="id === item.id" class="pa">
              <svg viewBox="0 0 1473 1024" width="17.34375" height="12">
              <path
                d="M1388.020 57.589c-15.543-15.787-37.146-25.569-61.033-25.569s-45.491 9.782-61.023 25.558l-716.054 723.618-370.578-374.571c-15.551-15.769-37.151-25.537-61.033-25.537s-45.482 9.768-61.024 25.527c-15.661 15.865-25.327 37.661-25.327 61.715 0 24.053 9.667 45.849 25.327 61.715l431.659 436.343c15.523 15.814 37.124 25.615 61.014 25.615s45.491-9.802 61.001-25.602l777.069-785.403c15.624-15.868 25.271-37.66 25.271-61.705s-9.647-45.837-25.282-61.717M1388.020 57.589z"
@@ -23,21 +23,14 @@
               <p>收货人: {{item.receiverName}} {{item.isDefault ? '(默认地址)' : ''}}</p>
               <p class="street-name ellipsis">收货地址: {{item.receiverAddress}}</p>
               <p>手机号码: {{item.receiverPhone}}</p>
-              <!-- <div class="operation-section">
-                <span class="update-btn" style="font-size:12px" @click="updateAddress(item)">修改</span>
-              </div> -->
             </li>
-            <!-- <li class="add-address-item" @click="updateAddress()">
-              <i class="el-icon-circle-plus-outline"></i>
-              <p>使用新地址</p>
-            </li> -->
           </ul>
         </div>
       </y-shelf>
       <y-shelf title="订单列表" style="margin-bottom:0px;margin-top:10px;">
       </y-shelf>
        <div class="table">
-          <el-table :data="tableData" v-loading="dataListLoading">
+          <el-table :data="cartList" v-loading="dataListLoading">
             <el-table-column label="商品图片" prop="goodsUrl" align="center" width="170">
               <template slot-scope="scope">
                 <img :src="scope.row.goodsUrl" width="80px"/>
@@ -53,15 +46,16 @@
                 {{scope.row.goodsPrice}}
               </template>
             </el-table-column>
-            <el-table-column prop="buyQuantity" label="购买数量" align="center">
+            <el-table-column prop="buyCounts" label="购买数量" align="center">
               <template slot-scope="scope">
-                <el-input-number size="mini" :min=1 step-strictly
-                v-model="scope.row.buyQuantity"></el-input-number>
+                {{scope.row.buyCounts}}
+                <!-- <el-input-number size="mini" :min=1 step-strictly
+                v-model="scope.row.buyCounts"></el-input-number> -->
               </template>
             </el-table-column>
             <el-table-column prop="totalPrice" label='小计' align="center">
               <template slot-scope="scope">
-                {{scope.row.goodsPrice*scope.row.buyQuantity}}
+                {{scope.row.goodsPrice*scope.row.buyCounts}}
               </template>
             </el-table-column>
           </el-table>
@@ -93,33 +87,46 @@ import YHeader from '../../common/header'
 import { mapMutations, mapState } from 'vuex'
 import YShelf from "../../components/shelf";
 import YButton  from "../../components/yButton";
+import { getAddressList,submitOrdersInfo} from "../../api/user";
 export default {
   components:{
     YHeader,YShelf,YButton
   },
   data(){
     return{
-      addList:[{
-        addressId:'1',
-        receiverName:'',
-        isDefault:false,
-        receiverAddress:'',
-        receiverPhone:'',
-      }],
+      addList:[],
       receiverAddress:'',
       receiverPhone:'',
-      addressId:'',
+      id:'',
       receiverName:'',
       // 订单列表
-      tableData:[],
+      cartList:[],
       submitOrder: '提交订单',
       orderTotal: 0,
       submit: false,
       dataListLoading:false,
     }
   },
+  computed: {
+    btnHighlight () {
+      let msg = this.msg
+      return msg.userName && msg.tel && msg.streetName
+    },
+      // 选中的总价格
+    checkPrice () {
+      let totalPrice = 0
+      this.cartList && this.cartList.forEach(item => {
+        totalPrice += (item.goodsPrice * item.buyCounts)
+      })
+      this.orderTotal = totalPrice
+      return totalPrice
+    },
+  },
+
   mounted(){
-    // this.getAddressInfo();
+    this.cartList =this.$root.checkoutrtList;
+    // console.log('checkoutList',checkoutList);
+    this.getAddressInfo();
     // this.getSettleGoodsInfo();
   },
   methods:{
@@ -127,15 +134,16 @@ export default {
       const that = this;
       getAddressList().then(res=>{
         if(res&& res.code === 200){
-          that.addList = res.body;
+          that.addList = res.data;
+          that.id = res.data[0].id;
         }
       },()=>{})
     },
     getSettleGoodsInfo(){
       this.dataListLoading = true;
-      getSettleGoodsList().then(res =>{
+      getOrdersList().then(res =>{
         if(res && res.code === 200){
-          that.tableData = res.body;
+          that.cartList = res.body;
         }
         this.dataListLoading = false;
       },err =>{
@@ -143,8 +151,8 @@ export default {
       })
     },
     // 选择地址
-    chooseAddress (addressId, receiverName, receiverPhone, receiverAddress) {
-      this.addressId = addressId
+    chooseAddress (id, receiverName, receiverPhone, receiverAddress) {
+      this.id = id
       this.receiverName = receiverName
       this.receiverPhone = receiverPhone
       this.receiverAddress = receiverAddress
@@ -153,37 +161,44 @@ export default {
     updateAddress(){
       this.$router.push({path: '/user/before-addressList'})
     },
+
+    //获取订单列表具体信息
+    getOrdersInfo(){
+      let itemIds = '';
+      this.cartList.forEach(item => {
+        console.log("数据",item);
+        itemIds = itemIds+item.goodsId+'-'+item.buyCounts+','
+      });
+      return itemIds
+    },
     _submitOrder () {
       this.submitOrder = '提交订单中...'
       this.submit = true
       var array = []
-      if (this.addressId === '0') {
-        this.message('请选择收货地址')
+      if (!this.id) {
+        this.$message.error('请选择收货地址')
         this.submitOrder = '提交订单'
         this.submit = false
         return
       }
       if (this.cartList.length === 0) {
-        this.message('非法操作')
+        this.$message.error('非法操作')
         this.submitOrder = '提交订单'
         this.submit = false
         return
       }
+      let itemIds = this.getOrdersInfo();
       let params = {
-        userId: this.userId,
-        tel: this.tel,
-        userName: this.userName,
-        streetName: this.streetName,
-        goodsList: this.tableData,
-        orderTotal: this.orderTotal
+        addressId: this.id,
+        itemIds: itemIds
       }
       // 提交订单 
-      submitOrder(params).then(res => {
-        if (res.code === 200) {
+      submitOrdersInfo(params).then(res => {
+        if (res && res.code === 200) {
           this.$message.success('购买成功');
           this.$router.push({path: '/user/before-orderList'})
         } else {
-          this.message(res.message)
+          this.$message.error(res.message)
           this.submitOrder = '提交订单'
           this.submit = false
         }

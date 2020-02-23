@@ -6,7 +6,7 @@
         <div class="gallery">
           <div class="thumb">
             <div class="big">
-              <img :src="big" :alt="product.productName">
+              <img :src="product.goodsUrl" :alt="product.productName">
             </div>
           </div>
         </div>
@@ -14,24 +14,29 @@
       <!--右边-->
       <div class="banner">
         <div class="sku-custom-title">
-          <h4>{{product.productName}}</h4>
-          <h6>
-            <span>{{product.subTitle}}</span>
+          <h4>{{product.goodsName}}</h4>
+          <h6 style='margin:0'>
+            <span>{{product.goodsDesc}}</span>
             <span class="price">
-              <em>¥</em><i>{{product.salePrice.toFixed(2)}}</i></span>
+              <em>¥</em><i>{{product.goodsPrice}}</i></span>
           </h6>
+          <!-- <h6 style='margin:0'> -->
+            <p style="color:#bdbdbd">库存剩余:<span>{{product.goodsInventory}}</span></p> 
+            <p style="color:#bdbdbd">品牌:<span>{{product.brandName}}</span></p> 
+            <p style="color:#bdbdbd">品牌类型:<span>{{product.brandType}}</span></p> 
+          <!-- </h6> -->
         </div>
         <div class="num">
           <span class="params-name">数量</span>
-          <buy-num @edit-num="editNum" :limit="Number(product.limitNum)"></buy-num>
+          <buy-num @edit-num="editNum" :limit="Number(product.goodsLimit)"></buy-num>
         </div>
         <div class="buy">
           <y-button text="加入购物车"
-                    @btnClick="addCart(product.productId,product.salePrice,product.productName,product.productImageBig)"
+                    @btnClick="addCart(product.id,product.goodsPrice,product.goodsName,product.goodsUrl)"
                     classStyle="main-btn"
                     style="width: 145px;height: 50px;line-height: 48px"></y-button>
           <y-button text="现在购买"
-                    @btnClick="checkout(product.productId)"
+                    @btnClick="checkout(product.id,product.goodsPrice,product.goodsName,product.goodsUrl)"
                     style="width: 145px;height: 50px;line-height: 48px;margin-left: 10px"></y-button>
         </div>
       </div>
@@ -39,66 +44,60 @@
   </div>
 </template>
 <script>
-//   import { productDet, addCart } from '/api/goods'
-//   import { mapMutations, mapState } from 'vuex'
+  // import { productDet, addCart } from '/api/goods'
+  import { mapMutations, mapState } from 'vuex'
   import YShelf from '../../components/shelf'
   import BuyNum from '../../components/buynum'
   import YButton from '../../components/yButton'
-//   import { getStore } from '/utils/storage'
+  import { getGoodsInfo } from "../../api/goods-manage";
+  import { joinCart } from "../../api/before-goods";
+  // import { getStore } from '/utils/storage'
   export default {
     data () {
       return {
-        productMsg: {},
-        small: [],
-        big: '',
         product: {
           salePrice: 0,
-          limitNum: 100,
-          productId: 150642571432851,
-          productName: "优点智能 E1 推拉式智能指纹密码锁",
-          salePrice: 2699,
-          subTitle: "推拉一下，轻松开关",
+          limitNum: 0,
+          productId: '',
+          productName: "",
+          salePrice: 0,
+          subTitle: "",
+          brandType:'',
+          brandName:'',
         },
-        productNum: 1,
+        buyQuantity: 1,
         userId: ''
       }
     },
     computed: {
-      // ...mapState(['login', 'showMoveImg', 'showCart'])
+      ...mapState(['login', 'showMoveImg', 'showCart'])
     },
     methods: {
-      // ...mapMutations(['ADD_CART', 'ADD_ANIMATION', 'SHOW_CART']),
-      _productDet (productId) {
-        // productDet({params: {productId}}).then(res => {
-        //   let result = res.result
-        //   this.product = result
-        //   this.productMsg = result.detail || ''
-        //   this.small = result.productImageSmall
-        //   this.big = this.small[0]
-        // })
+      ...mapMutations(['ADD_CART', 'ADD_ANIMATION', 'SHOW_CART']),
+      _productDet (id) {
+        getGoodsInfo(id).then(res =>{
+          if(res && res.code === 200){
+            console.log('商品详情',res);
+            this.product = res.data;
+            this.big = res.data.goodsUrl;
+          }
+        })
       },
       addCart (id, price, name, img) {
         if (!this.showMoveImg) {     // 动画是否在运动
-          if (this.login) { // 登录了 直接存在用户名下
-            addCart({userId: this.userId, productId: id, productNum: this.productNum}).then(res => {
-              // 并不重新请求数据
-              this.ADD_CART({
-                productId: id,
-                salePrice: price,
-                productName: name,
-                productImg: img,
-                productNum: this.productNum
-              })
+            joinCart({
+              buyCounts: this.buyQuantity,
+              goodsId: id,
+              goodsName: name,
+              goodsPrice: price,
+              goodsUrl: img,
+            }).then(res =>{
+              if(res && res.code === 200){
+                this.$message.success('加入购物车成功');
+              }else{
+                 this.$message.error(res.msg)
+              }
             })
-          } else { // 未登录 vuex
-            this.ADD_CART({
-              productId: id,
-              salePrice: price,
-              productName: name,
-              productImg: img,
-              productNum: this.productNum
-            })
-          }
           // 加入购物车动画
           var dom = event.target
           // 获取点击的坐标
@@ -111,20 +110,28 @@
           }
         }
       },
-      checkout (productId) {
-        this.$router.push({path: '/before-checkout', query: {productId, num: this.productNum}})
+      checkout (id, price, name, img) {
+        this.$root.checkoutrtList = [{
+              buyCounts: this.buyQuantity,
+              goodsId: id,
+              goodsName: name,
+              goodsPrice: price,
+              goodsUrl: img,
+        }];
+        this.$router.push(
+          {path: '/before-checkout'}
+          )
       },
       editNum (num) {
-        this.productNum = num
+        this.buyQuantity = num
       }
     },
     components: {
       YShelf, BuyNum, YButton
     },
     created () {
-      let id = this.$route.query.productId
+      let id = this.$route.query.id
       this._productDet(id)
-      // this.userId = getStore('userId')
     }
   }
 </script>
@@ -133,7 +140,7 @@
 
   .store-content {
     width: 100%;
-    min-height: 600px;
+    // min-height: 600px;
     padding: 0 0 25px;
     margin: 0 auto;
   }
@@ -182,7 +189,7 @@
           }
           img {
             display: block;
-            @include wh(440px)
+            @include wh(340px)
           }
         }
       }

@@ -24,11 +24,6 @@
             :key="index" :prop="item"
             align="center">
         </el-table-column>
-        <el-table-column label="相关商品数量" width="150" align="center">
-           <template slot-scope="scope">
-             {{scope.row.brandNum?scope.row.brandNum:'暂无数据'}}
-           </template>
-        </el-table-column>
          <el-table-column label="操作" width="200" align="center">
           <template slot-scope="scope">
             <el-button

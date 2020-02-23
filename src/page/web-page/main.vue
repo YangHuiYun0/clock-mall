@@ -10,7 +10,7 @@
                 admin<i class="el-icon-arrow-down el-icon--right"></i>
               </span>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command ='userInfo'>个人中心</el-dropdown-item>
+                <!-- <el-dropdown-item command ='userInfo'>个人中心</el-dropdown-item> -->
                 <el-dropdown-item command = 'exit'>退出</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -37,7 +37,7 @@
                 <span>首页内容展示管理</span>
               </template>
                 <el-menu-item index="/web-bannerList">首页轮播图管理</el-menu-item>
-                <el-menu-item index="1-2">首页官方推荐管理</el-menu-item>
+                <!-- <el-menu-item index="1-2">首页官方推荐管理</el-menu-item> -->
             </el-submenu>
             <el-submenu index="2">
               <template slot="title">

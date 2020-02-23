@@ -32,16 +32,14 @@
               <div class="layout-title">商品总览</div>
               <div style="padding: 40px">
                 <el-row>
-                  <el-col :span="6" class="color-danger overview-item-value">100</el-col>
-                  <el-col :span="6" class="color-danger overview-item-value">400</el-col>
-                  <el-col :span="6" class="color-danger overview-item-value">50</el-col>
-                  <el-col :span="6" class="color-danger overview-item-value">500</el-col>
+                  <el-col :span="8" class="color-danger overview-item-value">{{dataInfo.saleGoodsCount}}</el-col>
+                  <el-col :span="8" class="color-danger overview-item-value">{{dataInfo.unSaleGoodsCount}}</el-col>         
+                  <el-col :span="8" class="color-danger overview-item-value">{{dataInfo.goodsCount}}</el-col>
                 </el-row>
                 <el-row class="font-medium">
-                  <el-col :span="6" class="overview-item-title">已下架</el-col>
-                  <el-col :span="6" class="overview-item-title">已上架</el-col>
-                  <el-col :span="6" class="overview-item-title">库存紧张</el-col>
-                  <el-col :span="6" class="overview-item-title">全部商品</el-col>
+                  <el-col :span="8" class="overview-item-title">已上架</el-col>
+                  <el-col :span="8" class="overview-item-title">已下架</el-col>
+                  <el-col :span="8" class="overview-item-title">全部商品</el-col>
                 </el-row>
               </div>
             </div>
@@ -51,16 +49,14 @@
               <div class="layout-title">用户总览</div>
               <div style="padding: 40px">
                 <el-row>
-                  <el-col :span="6" class="color-danger overview-item-value">100</el-col>
-                  <el-col :span="6" class="color-danger overview-item-value">200</el-col>
-                  <el-col :span="6" class="color-danger overview-item-value">1000</el-col>
-                  <el-col :span="6" class="color-danger overview-item-value">5000</el-col>
+                  <el-col :span="8" class="color-danger overview-item-value">{{dataInfo.todayUserCount}}</el-col>
+                  <el-col :span="8" class="color-danger overview-item-value">{{dataInfo.monthUserCount}}</el-col>
+                  <el-col :span="8" class="color-danger overview-item-value">{{dataInfo.userCount}}</el-col>
                 </el-row>
                 <el-row class="font-medium">
-                  <el-col :span="6" class="overview-item-title">今日新增</el-col>
-                  <el-col :span="6" class="overview-item-title">昨日新增</el-col>
-                  <el-col :span="6" class="overview-item-title">本月新增</el-col>
-                  <el-col :span="6" class="overview-item-title">会员总数</el-col>
+                  <el-col :span="8" class="overview-item-title">今日新增</el-col>
+                  <el-col :span="8" class="overview-item-title">本月新增</el-col>
+                  <el-col :span="8" class="overview-item-title">会员总数</el-col>
                 </el-row>
               </div>
             </div>
@@ -73,15 +69,35 @@
 </template>
 
 <script>
+import { getHomeInfo } from "../../api/login";
 export default {
   data(){
     return{
       dataList:[
-        {type:1,dataNum:1334,dataName:'用户总数'},
-        {type:2,dataNum:2334,dataName:'商品总数'},
-        {type:3,dataNum:3334,dataName:'订单总数'},
-        {type:4,dataNum:4334,dataName:'浏览量'},
+        {type:1,dataNum:0,dataName:'用户总数'},
+        {type:2,dataNum:0,dataName:'商品总数'},
+        {type:3,dataNum:0,dataName:'订单总数'},
+        {type:4,dataNum:0,dataName:'退款订单总数'},
       ],
+      dataInfo:{},
+    }
+  },
+  mounted(){
+    this.getDataInfo();
+  },
+  methods:{
+    getDataInfo(){
+      const that = this;
+      getHomeInfo().then(res => {
+        if(res && res.code === 200){
+          console.log(res);
+          that.dataList[0].dataNum = res.data.userCount;
+          that.dataList[1].dataNum = res.data.goodsCount;
+          that.dataList[2].dataNum = res.data.orderCount;
+          that.dataList[3].dataNum = res.data.cancelOrderCount;
+          that.dataInfo = res.data;
+        }
+      })
     }
   }
 }

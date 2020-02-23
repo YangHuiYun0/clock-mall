@@ -42,3 +42,39 @@ export function getCauseInfo(id) {
     method: 'get'
   });
 }
+
+// 查询订单列表
+export function getOrdersList(params) {
+  return request({
+    url: '/orders/list',
+    method: 'get',
+    params
+  });
+}
+
+// 查看订单详情
+
+export function getOrdersInfo(id) {
+  return request({
+    url: '/orders/info/'+id,
+    method: 'get',
+  });
+}
+
+// 填写快递单号
+export function setDeliveryCode(id,params) {
+  return request({
+    url: '/orders/delivery/'+id,
+    method: 'put',
+    params
+  });
+}
+
+// 退货原因选择
+export function setRefundCause(id,params) {
+  return request({
+    url: '/orders/cancel/'+id,
+    method: 'put',
+    params
+  });
+}

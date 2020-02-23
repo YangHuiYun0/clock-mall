@@ -1,7 +1,7 @@
 <template>
   <div class="shopping-cart">
     <y-header>
-      <div slot="nav"></div>
+      <div slot="nav" ></div>
     </y-header>
     <div class="store-content page-cart">
       <div class="gray-box">
@@ -30,20 +30,21 @@
                     {{scope.row.goodsPrice}}
                   </template>
                 </el-table-column>
-                <el-table-column prop="buyQuantity" label="购买数量" align="center">
+                <el-table-column prop="buyCounts" label="购买数量" align="center">
                   <template slot-scope="scope">
-                    <el-input-number size="mini" :min=1 step-strictly
-                    v-model="scope.row.buyQuantity"></el-input-number>
+                    <el-input-number size="mini" :min=1 step-strictly  @change="handleChange($event,scope.row)"
+                    v-model="scope.row.buyCounts"></el-input-number>
                   </template>
                 </el-table-column>
                 <el-table-column prop="totalPrice" label='小计' align="center">
                   <template slot-scope="scope">
-                    {{scope.row.goodsPrice*scope.row.buyQuantity}}
+                    {{scope.row.goodsPrice*scope.row.buyCounts}}
                   </template>
                 </el-table-column>
                 <el-table-column label="操作" align="center">
                   <template slot-scope="scope">
-                    <el-button type="danger" icon="el-icon-close" size="mini" circle></el-button>
+                    <el-button type="danger" icon="el-icon-close" size="mini" circle 
+                    @click="delCart(scope.row,scope.$index);"></el-button>
                   </template>
                 </el-table-column>
             </el-table>
@@ -52,7 +53,7 @@
             <div class="fix-bottom-inner">
               <div class="cart-bar-operation">
                 <div>
-                  <div class="delete-choose-goods" @click="delChecked">删除选中的商品</div>
+                  <!-- <div class="delete-choose-goods" @click="delChecked">删除选中的商品</div> -->
                 </div>
               </div>
               <div class="shipping">
@@ -73,6 +74,16 @@
             </div>
           </div>
         </div>
+        <div v-else style="padding:50px">
+          <div class="cart-e">
+          </div>
+          <p style="text-align: center;padding: 20px;color: #8d8d8d">你的购物车空空如也</p>
+          <div style="text-align: center">
+            <router-link to="/before-goods">
+              <y-button text="现在选购" style="width: 150px;height: 40px;line-height: 38px;color: #8d8d8d"></y-button>
+            </router-link>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -84,24 +95,34 @@ import { mapMutations, mapState } from 'vuex'
 import YShelf from "../../components/shelf";
 import YButton  from "../../components/yButton";
 import BuyNum from '../../components/buynum'
+import { getCartList,editCartInfo,delCartInfo } from "../../api/before-goods";
 export default {
   components:{
     YHeader,YShelf,YButton,BuyNum
   },
   data(){
     return{
-      tableData:[{
-        goodsUrl:'',
-        goodsName:'',
-        goodsPrice:'',
-        buyQuantity:1,
-      }],
+      tableData:[],
       dataListLoading:false,
-      checkNum:1,//勾选的数量
+      checkNum:0,//勾选的数量
       totalPrice:0,//选中的价格
       checkoutNow: '现在结算',
-      submit: true
+      submit: true,
+      checkoutrtList:[],
     }
+  },
+  mounted(){
+    this.dataListLoading = true;
+    getCartList().then(res =>{
+      if(res && res.code === 200){
+        this.tableData = res.data;
+      }else{
+        this.$message.error(res.msg)
+      }
+      this.dataListLoading = false;
+    }).catch(err=>{
+      this.dataListLoading = false;
+    })
   },
   computed:{
     ...mapState(
@@ -111,25 +132,61 @@ export default {
     totalNum () {
       var totalNum = 0
       this.tableData && this.tableData.forEach(item => {
-        totalNum += (item.buyQuantity)
+        totalNum += (item.buyCounts)
       })
       return Number(totalNum)
     },
 
   },
   methods:{
+    handleChange(currentValue,row){
+      // console.log('商品id',row);
+      // const type = currentValue>oldValue?'add':'sub';
+      editCartInfo(row.goodsId,{
+        num:currentValue
+      }).then(res =>{
+        if(res && res.code === 200){
+          console.log(res);
+          
+        }
+      })
+    },
     handleSelectionChange(val){
+      this.checkoutrtList = val;
       this.checkNum = 0;
       this.totalPrice = 0;
       val && val.forEach(item => {
-        this.checkNum += item.buyQuantity;
-        this.totalPrice += (item.buyQuantity * item.goodsPrice)
+        this.checkNum += item.buyCounts;
+        this.totalPrice += (item.buyCounts * item.goodsPrice)
       })
     },
     checkout () {
       this.checkoutNow = '结算中...'
-      this.submit = false
+      this.submit = false;
+      
+      this.$root.checkoutrtList = this.checkoutrtList;
+      // this.$store.commit('cart/CHECKOUT_INFO',this.checkoutrtList)
       this.$router.push({path: '/before-checkout'})
+    },
+    delCart(row,index){
+      const that = this;
+      this.$confirm(`确定对「 ${row.goodsName} 」进行「 删除 」操作?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        delCartInfo(row.goodsId).then(res=>{
+          if(res && res.code === 200){
+            that.$message.success(`删除商品 ${row.goodsName} 成功`);
+            that.tableData.splice(index, 1);
+            that.$router.replace({
+              path:'/refresh'
+            }) ;
+          }else{
+            that.$message.error(res.msg)
+          }
+        })
+      }).catch(()=>{});
     },
     //删除选中的商品
     delChecked(){},

@@ -10,7 +10,8 @@
         <el-table-column
           label="排序"
           type="index"
-          width="50">
+          width="50"
+          align="center">
         </el-table-column>
         <el-table-column prop="receiverName" label="收件人姓名" align="center">
           <template slot-scope="scope">
@@ -32,26 +33,26 @@
             {{scope.row.detailAddress}}
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center">
+        <el-table-column label="操作" align="center" width="320">
           <template slot-scope="scope">
             <el-button :type="scope.row.isDefault?'danger':'info'" plain 
                         size="mini" @click="setDefault(scope.row,$index)"
                         :disabled="scope.row.isDefault?true:false">
               {{scope.row.isDefault?'默认地址':'设为默认'}}
             </el-button>
-            <el-button type="primary" size="mini" @click="addAddress(scope.row,$index)">编辑</el-button>
-            <el-button type="danger" size="mini" @click="delAddress(scope.row,$index)">删除</el-button>
+            <el-button type="primary" size="mini" @click="addAddress(scope.row,scope.$index)">编辑</el-button>
+            <el-button type="danger" size="mini" @click="delAddress(scope.row,scope.$index)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
-      <el-pagination
+      <!-- <el-pagination
         background
         layout="total, prev, pager, next"
         :current-page=page
         :total=listTotal
         :page-size=pageSize
         @current-change="currentChangeHandle">
-      </el-pagination>
+      </el-pagination> -->
     </div>
      <el-dialog :title="!addressForm.id ? '新增地址' : '地址修改'"
              :before-close="beforeClose"
@@ -92,6 +93,14 @@
 <script>
 import YShelf from '../../../../components/shelf'
 import YButton from "../../../../components/yButton";
+import { 
+  getAddressList,
+  getAddressInfo,
+  addAddressInfo,
+  editAddressInfo,
+  delAddressInfo,
+  editAddressDefault
+ } from "../../../../api/user";
 let pcas = require("../pcas/pca-code.json")
 
 export default {
@@ -107,7 +116,7 @@ export default {
       }
     }
     return{
-      tableData:[{status:1},{status:0}],
+      tableData:[],
       dataListLoading:false,
       page: 0,
       pageSize: 20,
@@ -115,7 +124,7 @@ export default {
       dialogVisible:false,
       submitLoading:false,
       addressForm:{
-        addressId:'',
+        id:'',
         receiverName:'',
         receiverPhone:'',
         receiverAddress:'',
@@ -145,20 +154,24 @@ export default {
     }
   },
   mounted(){
-    // this.getDataList('init');
+    this.getDataList('init');
   },
   methods:{
     addAddress(row,index){
+      const that = this;
       this.dialogVisible = true;
-      if(row && row.addressId){
+      if(row && row.id){
         const that = this;
-        getAddressInfo(row.addressId).then(res =>{
+        getAddressInfo(row.id).then(res =>{
           if(res && res.code === 200 ){
-            that.addressForm = res.body;
+            that.addressForm = res.data;
+            that.addressForm.selectedOptions = res.data.selectedOptions.split(",");
           }
         },()=>{
-
         })
+      }else{
+        that.addressForm.id = '';
+        that.addressForm.selectedOptions = [];
       }
     },
     delAddress(row,index){
@@ -168,7 +181,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delAddressInfo(row.addressId).then(res=>{
+        delAddressInfo(row.id).then(res=>{
           if(res && res.code === 200){
             that.$message.success(`删除地址成功`);
             that.tableData.splice(index, 1);
@@ -180,22 +193,25 @@ export default {
     },
     setDefault(row,index){
       if(row.status) return;
+      editAddressDefault(row.id).then(res =>{
+        if(res && res.code === 200){
+          this.getDataList('init');
+        }
+      })
     },
     getDataList(type){
       if (type === 'init') {
         this.page = 0;
       }
       this.dataListLoading = true;
-      getActivityList({
-        page: this.page >= 1 ? this.page - 1 : this.page,
-        size: this.pageSize,
+      getAddressList({
       }).then(res => {
         if (res && res.code === 200) {
-          this.tableData = res.body.list;
-          this.listTotal = res.body.totalCount;
+          this.tableData = res.data;
         }else{
-          this.dataListLoading = false;
+          this.message.error('查询出错')
         }
+         this.dataListLoading = false;
       },()=>{
         this.dataListLoading = false;
       });
@@ -216,18 +232,19 @@ export default {
     formSubmit(){
       const that = this;
       this.submitLoading = true;
+      that.addressForm.selectedOptions= that.addressForm.selectedOptions.join()
       that.$refs.addressForm.validate(valid => {
         if (!valid) {
           this.$message.error('请填写完整再保存');
           return false;
         }
-        const submitFun = that.addressForm.addressId ?editAddress:addAddress;
-        submitFun(that.addressForm.addressId,that.addressForm).then(res=>{
+        const submitFun = that.addressForm.id ?editAddressInfo:addAddressInfo;
+        submitFun(that.addressForm.id,that.addressForm).then(res=>{
           console.log('res',res);
           if(res&&res.code ===200){
             this.$message({
               type: 'success',
-              message: `${that.addressForm.addressId?'修改':'增加'}成功`
+              message: `${that.addressForm.id?'修改':'增加'}成功`
             });
             that.$refs.addressForm.resetFields();
             that.getDataList();

@@ -8,7 +8,9 @@
         <div class="account-sidebar">
           <div class="avatar gray-box ">
             <div>
-              <h5>上帝</h5></div>
+              <img :src="userUrl" v-if="userUrl">
+              <img src="./image/titImg.png" alt="" v-if="!userUrl" >
+              <h5 style="margin:0">{{name}}</h5></div>
               <!-- {{userInfo.info.username}} -->
             <div class="box-inner">
               <ul class="account-nav">
@@ -28,6 +30,8 @@
 </template>
 <script>
   import YHeader from '../../../common/header'
+  import Cookies from 'js-cookie';
+  import { editMember,getMember } from "../../../api/member-manage";
   import { mapState } from 'vuex'
   export default {
     components: {
@@ -36,12 +40,17 @@
     data () {
       return {
         title: '我的订单',
+        name:'',
+        userUrl:'',
+        // userUrl:this.$root.userIamgeUrl,
         nav: [
           {name: '我的订单', path: 'before-orderList'},
           {name: '账户资料', path: 'before-userInfo'},
           {name: '收货地址', path: 'before-addressList'},
         ],
-        editAvatar: true
+        editAvatar: true,
+        userData:'',
+        id:'',
       }
     },
     computed: {
@@ -53,6 +62,16 @@
       }
     },
     created () {
+      this.userData = Cookies.get('userData');
+      this.id = this.userData.split(',')[0].split(':')[1];
+      this.id =this.id.replace(/\"/g, "");
+      getMember(this.id).then(res =>{
+        if(res && res.code === 200){
+          this.name = res.data.name;
+          this.userUrl = res.data.userImgUrl;
+        }
+      })
+
       let path = this.$route.path.split('/')[2]
       this.nav.forEach(item => {
         if (item.path === path) {

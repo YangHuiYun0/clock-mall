@@ -14,3 +14,11 @@ export function getLogout() {
       method:'get',
   })
 }
+
+// 查询后台首页
+export function getHomeInfo() {
+  return request({
+      url:'/home',
+      method:'get',
+  })
+}

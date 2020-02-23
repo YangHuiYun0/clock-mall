@@ -5,13 +5,6 @@
     <el-card style="margin-bottom:10px">
       <div style="margin-top: 15px">
         <el-input v-model="orderCode" class="input-width" placeholder="订单编号" style="width: 250px;"></el-input>
-        <el-select v-model="status" placeholder="处理状态" clearable class="input-width">
-          <el-option v-for="item in statusOptions"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value">
-          </el-option>
-        </el-select>
         <el-button icon="el-icon-search" class="modify-btn search-btn"
               type="success"  @click="getDataList('init')">查询</el-button>
       </div>
@@ -27,13 +20,10 @@
             <template slot-scope="scope">{{formatTime(scope.row.createTime)}}</template>
           </el-table-column>
           <el-table-column label="用户账号" align="center">
-            <template slot-scope="scope">{{scope.row.buyUser}}</template>
+            <template slot-scope="scope">{{scope.row.customerName}}</template>
           </el-table-column>
           <el-table-column label="退款金额" width="180" align="center">
-            <template slot-scope="scope">￥{{scope.row | formatReturnAmount}}</template>
-          </el-table-column>
-          <el-table-column label="申请状态" width="180" align="center">
-            <template slot-scope="scope">{{scope.row.status }}</template>
+            <template slot-scope="scope">￥{{scope.row.orderAmount}}</template>
           </el-table-column>
           <el-table-column label="处理时间" width="180" align="center">
             <template slot-scope="scope">{{scope.row.updateTime }}</template>
@@ -60,6 +50,7 @@
 
 <script>
 import { formatTime } from "../../../util/time";
+import { getOrdersList } from "../../../api/order-manage";
 export default {
   data(){
     return{
@@ -68,18 +59,12 @@ export default {
       pageSize:12,
       orderCode:'',
       status:'',
-      statusOptions:[
-        { label: '待处理', value: 0},
-        { label: '退货中', value: 1},
-        { label: '已完成', value: 2},
-        { label: '已拒绝', value: 3}
-      ],
       dataListLoading:false,
-      applyData:[{}],
+      applyData:[],
     }
   },
   mounted(){
-    // this.getDataList('init');
+    this.getDataList('init');
   },
   methods:{
     currentChangeHandle(val){
@@ -97,11 +82,11 @@ export default {
       }
       this.dataListLoading = true;
       const that = this;
-      getApplyList({
+      getOrdersList({
         page:that.page,
         size:that.pageSize,
         orderCode:that.orderCode,
-        status:that.status,
+        status:3,
       }).then(res=>{
         if(res && res.code === 200){
           that.applyData = res.data.rows;

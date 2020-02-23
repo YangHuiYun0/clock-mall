@@ -5,20 +5,18 @@
       <div class="bg" ref="bg"
         @mouseover="bgOver($refs.bg)" @mousemove="bgMove($refs.bg,$event)" @mouseout="bgOut($refs.bg)">
         <transition name="fade">
-          <!-- <div v-for="(item, i) in banner" v-if="i===mark" :key="i" style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
+          <div v-for="(item, i) in banner" v-if="i===mark" :key="i" style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
             <img v-if="item.bannerUrl" class="img1" :src="item.bannerUrl"/>
-          </div> -->
-          <div  v-if="0===mark"  style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
+          </div>
+          <!-- <div  v-if="0===mark"  style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
             <img  class="img1" src="./image/bnr-1.jpg"/>
-            <!-- <img v-if="item.picUrl2"  class="img2 a" :src="item.picUrl2"/>
-            <img v-if="item.picUrl3"  class="img3 b" :src="item.picUrl3"/> -->
           </div>
           <div v-if="1===mark" style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
             <img  class="img1" src="./image/bnr-2.jpg"/>
           </div>
           <div v-if="2===mark" style="position:absolute" @click="linkTo(item)" @mouseover="stopTimer" @mouseout="startTimer">
            <img  class="img1" src="./image/bnr-3.jpg"/>
-          </div>
+          </div> -->
         </transition>
       </div>
       <div class="page">
@@ -32,6 +30,7 @@
 </template>
 
 <script>
+import { getBannerList } from "../api/home-set";
 export default {
     data(){
         return{
@@ -46,6 +45,16 @@ export default {
         }
     },
     methods: {
+      getBannerData(){
+        getBannerList({
+          page:0,
+          size:5
+        }).then(res =>{
+          if(res &&res.code === 200){
+            this.banner = res.data.rows
+          }
+        })
+      },
       autoPlay () {
         this.mark++
         if (this.mark > this.banner.length - 1) {
@@ -119,7 +128,8 @@ export default {
     mounted () {
     },
     created () {
-      this.play()
+      this.play();
+      this.getBannerData();
     },
 }
 

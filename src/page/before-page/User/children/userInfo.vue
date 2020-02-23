@@ -3,9 +3,23 @@
     <y-shelf title="个人资料" style="margin-bottom:0px"></y-shelf>
      <div class="table">
        <!-- 新增链接 -->
-          <el-button type="success" class="modify-btn right-btn" size="small"
+          <el-button type="primary" class="modify-btn right-btn" size="small" style="float: right; margin-left: 10px;" 
                     @click.native="updatePasswordHandle()">修改密码</el-button>
           <div class="msg-box">
+            <p >
+              <!-- <b>用户头像:</b> -->
+              <el-upload
+                  action=""
+                  :file-list="stockFileList"
+                  :on-change="handleChange"
+                  :on-remove="handleRemove"
+                  :before-upload="beforeUpload"
+                  :auto-upload="false">  
+                  <el-button size="small" type="primary">更换头像</el-button>
+              </el-upload>
+              <img v-if="userImgUrl" :src="userImgUrl" class="avatar-info">
+              <img src="../image/titImg.png" alt="" v-else class="avatar-info">
+            </p>
             <p >
               <b>用户名：</b>
               <span>{{name}}</span>
@@ -45,7 +59,10 @@
 
 <script>
 import YShelf from '../../../../components/shelf'
+import Cookies from 'js-cookie';
 import { editMember,getMember } from "../../../../api/member-manage";
+import { changeUserImg } from "../../../../api/user";
+import { getLogout } from "@/api/login";
 export default {
   components:{
     YShelf
@@ -60,10 +77,13 @@ export default {
     return{
       dialogVisible:false,
       submitLoading:false,
+      stockFileList:[],
+      userData:'',
       userName:'',
       name:'',
       phone:'',
       createTime:'',
+      userImgUrl:'',
       dataForm:{
         password:'',
         newPassword:'',
@@ -77,6 +97,9 @@ export default {
     }
   },
    mounted(){
+    this.userData = Cookies.get('userData');
+    this.id = this.userData.split(',')[0].split(':')[1]
+    this.id =this.id.replace(/\"/g, "")
     const that = this;
     getMember(this.id).then(res =>{
       if(res && res.code === 200){
@@ -84,7 +107,8 @@ export default {
         that.phone = res.data.phone;
         that.createTime = res.data.createTime;
         that.id = res.data.id;
-        that.userName = res.data.userName;
+        that.userName = res.data.loginName;
+        that.userImgUrl = res.data.userImgUrl;
       }
     })
   },
@@ -120,13 +144,78 @@ export default {
         })
       })
     },
+    handleChange(file, fileList) {
+        const spl = file.name.split('.');
+        var _fileSuffix = spl[spl.length - 1];
+        if ( _fileSuffix !== 'png' &&  _fileSuffix !== 'jpg' ) {
+            this.$message.error('文件格式不符，请上传png/jpg格式的文件');
+            this.stockFileList = [];
+            return false;
+        }
+        this.stockFileList = fileList.slice(-1);
+        const that = this;
+        var uploadBody = new FormData();
+        uploadBody.append('file',file.raw)
+        changeUserImg(uploadBody).then(res=>{
+            if(res && res.code === 200){
+                that.userImgUrl =  res.data.userImgUrl;
+                that.$root.userIamgeUrl = res.data.userImgUrl;
+                that.stockFileList = []; 
+                that.$router.replace({
+                  path:'/refresh'
+                }) ;
+            }else {
+                that.$message.error(res.msg);
+            }
+        }).catch(err=>{
+            that.$message.error(err);
+        });
+    },
+
+    handleRemove(file, fileList) {
+        this.stockFileList = fileList;
+    },
+
+    beforeUpload(file) {
+        const spl = file.name.split('.');
+        if (spl[spl.length - 1] !== 'png' && spl[spl.length - 1] !== 'jpeg' ) {
+            this.$message.error('文件格式不符，请上传 png 格式的文件');
+            this.stockFileList = [];
+            return false;
+        }
+    },
   }
 }
 </script>
 
-<style>
+<style lang='scss' scope>
 .table{
+  padding: 30px 60px;
   border:1px solid #d4d4d4;
   border-radius: 8px 8px 0 0;
 }
+.el-upload {
+    // border:1px dashed #8c939d;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar-info {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 </style>

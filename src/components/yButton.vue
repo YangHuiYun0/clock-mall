@@ -4,9 +4,13 @@
          :class="classStyle"
          @click="btnClick($event)"
          :disabled="classStyle==='disabled-btn'"
-         :value="text">
+         :value="text"
+         @blur="animateWidth('company_name','blur')"
+         @focus="animateWidth('company_name','focus')"
+         >
 </template>
 <script>
+  import { mapMutations, mapState } from 'vuex'
   export default {
     name:'YButton',
     props: {
@@ -23,10 +27,31 @@
         default: 'default-btn'
       }
     },
+    computed: {
+      ...mapState(['showCart'])
+    },
     methods: {
+      ...mapMutations(['SHOW_CART']),
       btnClick (event) {
         this.$emit('btnClick', event)
-      }
+      },
+      animateWidth(name, type){
+        console.log(name+'......'+ type);
+        if(type ==='blur'){
+          this.SHOW_CART({showCart: false})
+        }else{
+          this.SHOW_CART({showCart: true})
+        }
+      },
+      // mouseClick(type){
+      //    if(type ==='2'){
+      //      console.log('离开');
+      //     this.SHOW_CART({showCart: false})
+      //   }else{
+      //     console.log('咋');
+      //     // this.SHOW_CART({showCart: true})
+      //   }
+      // },
     }
   }
 </script>

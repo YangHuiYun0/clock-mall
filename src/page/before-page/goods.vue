@@ -4,13 +4,21 @@
       <!-- 头部选择块 -->
         <div class="nav">
             <div class="w">
-                <a href="javascript:;" :class="{active:sortType===1}" @click="reset()">综合排序</a>
-                <a href="javascript:;" @click="sortByPrice(1)" :class="{active:sortType===2}">价格从低到高</a>
-                <a href="javascript:;" @click="sortByPrice(-1)" :class="{active:sortType===3}">价格从高到低</a>
+                <a  :class="{active:sortType===1}" @click="reset()">综合排序</a>
+                <a  @click="sortByPrice(1)" :class="{active:sortType===2}">价格从低到高</a>
+                <a  @click="sortByPrice(2)" :class="{active:sortType===3}">价格从高到低</a>
                 <div class="price-interval">
                 <input type="number" class="input" placeholder="价格" v-model="min">
                 <span style="margin: 0 5px"> - </span>
-                <input type="number" placeholder="价格" v-model="max">
+                <input type="number" placeholder="价格" v-model="max" style="margin-right:20px">
+                 <el-select v-model="goodsType" clearable  placeholder="商品类别">
+                    <el-option
+                    v-for="item in goodsTypeList"
+                    :key="item.categoryCode"
+                    :label="item.categoryName"
+                    :value="item.categoryCode">
+                    </el-option>
+                </el-select>
                 <y-button text="确定" classStyle="main-btn" @btnClick="reset" style="margin-left: 10px;"></y-button>
                 </div>
             </div>
@@ -53,37 +61,53 @@
 import YShelf from "../../components/shelf"; //卡片组件
 import mallGoods from "../../components/mallGoods";
 import YButton  from "../../components/yButton";
+import { getAllGoodsList } from "../../api/before-goods";
+import { getCategoryList } from "../../api/goods-manage";
+
 export default {
     components:{
         YShelf,mallGoods,YButton
     },
     data(){
         return{
-            goods: [
-                {
-                    productId: 150642571432852,
-                    productImageBig: '',
-                    salePrice: 499,
-                    subTitle: "全天佩戴 抬手就听 HEAC稳连技术"
-                },{},{},{}
-            ],
+            goods: [],
             noResult: false,
             error: false,
             min: '',
             max: '',
+            goodsType:'',
             loading: false,
             timer: null,
             sortType: 1,
             windowHeight: null,
             windowWidth: null,
             recommendPanel: [],
-            sort: '',
+            sort: 0,
             currentPage: 1,
             total: 30,
-            pageSize: 20
+            pageSize: 20,
+            desc:this.$route.query.key || '',//根据商品查询
+            goodsTypeList:[],
         }
     },
+    mounted(){
+        this._getAllGoods();
+        this.getTreeInfo();
+    },
+    watch:{
+        $route: function(to, from) {
+            if (to.query.key !== from.query.key) {
+                this._getAllGoods(to.query.key);
+            }
+        },
+        desc:function(newVal,oldVal){
+            if(newVal !== oldVal){
+                this._getAllGoods();
+            }
+        },
+    },
     methods:{
+
         //改变页数
         handleSizeChange (val) {
             this.pageSize = val
@@ -92,11 +116,11 @@ export default {
         },
     // 默认排序
         reset () {
-            this.sortType = 1
-            this.sort = ''
-            this.currentPage = 1
-            this.loading = true
-            this._getAllGoods()
+            this.sortType = 1;
+            this.sort = 0;
+            this.currentPage = 1;
+            this.loading = true;
+            this._getAllGoods();
         },
         // 改变当前页
         handleCurrentChange (val) {
@@ -112,7 +136,10 @@ export default {
             this.loading = true
             this._getAllGoods()
         },
-        _getAllGoods () {
+        _getAllGoods (_key) {
+            if(_key){
+               this.desc = _key; 
+            }
             let cid = this.$route.query.cid
             if (this.min !== '') {
             this.min = Math.floor(this.min)
@@ -121,29 +148,37 @@ export default {
             this.max = Math.floor(this.max)
             }
             let params = {
-            params: {
                 page: this.currentPage,
                 size: this.pageSize,
-                sort: this.sort,
-                priceGt: this.min,
-                priceLte: this.max,
-                cid: cid
+                sortType: this.sort,
+                amountStart: this.min,
+                amountEnd: this.max,
+                desc: this.desc,
+                categoryCode: this.goodsType,
             }
-            }
-            // getAllGoods(params).then(res => {
-            //   if (res.success === true) {
-            //     this.total = res.result.total
-            //     this.goods = res.result.data
-            //     this.noResult = false
-            //     if (this.total === 0) {
-            //       this.noResult = true
-            //     }
-            //     this.error = false
-            //   } else {
-            //     this.error = true
-            //   }
-            //   this.loading = false
-            // })
+            getAllGoodsList(params).then(res => {
+              if (res && res.code === 200) {
+                this.total = res.data.total;
+                this.goods = res.data.rows;
+                this.noResult = false;
+                if (this.total === 0) {
+                  this.noResult = true
+                }
+                this.error = false
+              } else {
+                this.error = true
+              }
+              this.loading = false
+            })
+        },
+
+        getTreeInfo(){
+            const that = this;
+            getCategoryList().then(res=>{
+                if(res && res.code === 200){
+                that.goodsTypeList = res.data;
+                }
+            }).catch()
         },
     }
 }
@@ -191,7 +226,7 @@ export default {
             input[type=number] {
                 border: 1px solid #ccc;
                 text-align: center;
-                background: none;
+                // background: none;
                 border-radius: 5px;
             }
         }

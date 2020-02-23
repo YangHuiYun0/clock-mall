@@ -18,28 +18,15 @@
                 </el-form-item>
                 <el-form-item label="轮播图图片" prop="bannerUrl" ref="bannerUrl">
                     <el-upload
-                        class="avatar-uploader"
-                        action ='auto'
-                        :show-file-list="false"
-                        :on-success="handlePlaySuccess"
-                        :before-upload="beforePlayUpload"
-                        :auto-upload="false">
-                        <img v-if="dataForm.imageUrl" :src="dataForm.imageUrl" class="avatar">
-                        <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                        action=""
+                        :file-list="stockFileList"
+                        :on-change="handleChange"
+                        :on-remove="handleRemove"
+                        :before-upload="beforeUpload"
+                        :auto-upload="false">  
+                        <el-button size="small" type="primary">上传图片</el-button>
                     </el-upload>
-                </el-form-item>
-                <el-form-item label="轮播图图片" prop="bannerUrl" ref="bannerUrl">
-                    <el-upload
-                    class="avatar-uploader"
-                    action="auto"
-                    :http-request="uploadImg"
-                    :show-file-list="false"
-                    :on-success="handlePlaySuccess"
-                    :before-upload="beforePlayUpload">
                     <img v-if="dataForm.bannerUrl" :src="dataForm.bannerUrl" class="avatar">
-                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
-                    <div slot="tip" class="el-upload__tip">建议尺寸750 * 750px</div>
-                    </el-upload>
                 </el-form-item>
             </el-card>
             <el-card style="margin-top:20px">
@@ -53,11 +40,14 @@
 </template>
 
 <script>
-// import uploadimg from "../../../components/uploadImg/index";
+
+import { 
+    getImageUrl,
+    getBannerInfo,
+    addBannerInfo,
+    editBannerInfo,
+} from "../../../api/home-set";
 export default {
-    // components:{
-    //     uploadimg
-    // },
     data(){
         const sortRequire = (rule, value, callback) => {
             if (!String(this.dataForm.sort).match(/^\+?[1-9]\d*$/)) {
@@ -67,10 +57,11 @@ export default {
             }
         }
         return{
-            breadCrumbList: [{ title: '首页轮播图列表', path: '/bannerList' }, { title: '轮播图详情' }],
+            breadCrumbList: [{ title: '首页轮播图列表', path: '/web-bannerList' }, { title: '轮播图详情' }],
             submitLoading:false,
+            stockFileList:[],
             dataForm:{
-                id:'',
+                id:this.$route.query.id || '',
                 bannerName:'',
                 bannerUrl:'',
                 sort:'',
@@ -88,13 +79,13 @@ export default {
        }
     },
     mounted(){
-        // this.getInfo();
+        this.getInfo();
     },
     methods:{
         getInfo(){
             const that = this;
             if(that.dataForm.id){
-            getGoods(that.dataForm.id).then(res=>{
+            getBannerInfo(that.dataForm.id).then(res=>{
                 if(res && res.code === 200){
                 that.dataForm = res.data;
                 }else{
@@ -113,7 +104,7 @@ export default {
                 return false;
             }
             that.submitLoading = true;
-            const submitFun = that.dataForm.id ? editBanner : addBanner;
+            const submitFun = that.dataForm.id ? editBannerInfo : addBannerInfo;
             submitFun(that.dataForm.id,that.dataForm).then(res=>{
                 console.log('res:',res);
                 if(res && res.code === 200){
@@ -138,53 +129,54 @@ export default {
             });
         },
 
-        handlePlaySuccess(res, file) {
-            this.dataForm.imageUrl = res.file;
-        },
-        beforePlayUpload(file) {
-            const isJPG = file.type === 'image/jpeg' ||  file.type === 'image/png' ;
-            const isLt2M = file.size / 1024 / 1024 < 2;
-            if (!isJPG) {
-            this.$message.error('上传头像图片只能是 JPG/png 格式!');
+        handleChange(file, fileList) {
+            console.log(file);
+            const spl = file.name.split('.');
+            var _fileSuffix = spl[spl.length - 1];
+            if ( _fileSuffix !== 'png' &&  _fileSuffix !== 'jpg' ) {
+                this.$message.error('文件格式不符，请上传png/jpg格式的文件');
+                this.stockFileList = [];
+                return false;
             }
-            if (!isLt2M) {
-            this.$message.error('上传头像图片大小不能超过 2MB!');
-            }
-            return isJPG && isLt2M;
-        },
-         //上传到后端
-        uploadImg(param){
-            console.log("jjjj",param);
-            this.beforePlayUpload(param.file);
-            this.handlePlaySuccess();
-            // this.imageToBase64(param);
+            this.stockFileList = fileList.slice(-1);
+            // 选择一个商品后 请求服务端  获取商品的数据  渲染列表
+            const that = this;
+            var uploadBody = new FormData();
+            uploadBody.append('file',file.raw)
+            that.dataListLoading = true;
+            getImageUrl(uploadBody).then(res=>{
+                if(res && res.code === 200){
+                    that.dataForm.bannerUrl =  res.data;
+                    that.stockFileList = [];  
+                }else {
+                    that.$message.error(res.msg);
+                }
+                that.dataListLoading = false;
+            }).catch(err=>{
+                that.$message.error(err);
+                that.dataListLoading = false;
+            });
         },
 
-       imageToBase64 (param) {
-        var reader = new FileReader()
-        reader.readAsDataURL(param.file)
-        reader.onload = () => {
-          uploadBase64Img({
-            context: reader.result
-          }).then(res => {
-            this.handlePlaySuccess(res);
-          }, err => {
-            console.log(err);
-          }).catch(err => {
-            console.log(err);
-          });
-        }
-        reader.onerror = function (error) {
-          console.log('Error: ', error);
-        }
-      },
+        handleRemove(file, fileList) {
+            this.stockFileList = fileList;
+        },
+
+        beforeUpload(file) {
+            const spl = file.name.split('.');
+            if (spl[spl.length - 1] !== 'png' && spl[spl.length - 1] !== 'jpeg' ) {
+                this.$message.error('文件格式不符，请上传 png 格式的文件');
+                this.stockFileList = [];
+                return false;
+            }
+        },
     }
 }
 
 </script>
 <style lang='scss'>
  .el-upload {
-    border:1px dashed #8c939d;
+    // border:1px dashed #8c939d;
     border-radius: 6px;
     cursor: pointer;
     position: relative;

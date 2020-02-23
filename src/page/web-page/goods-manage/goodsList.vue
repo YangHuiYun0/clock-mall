@@ -36,7 +36,7 @@
         <el-col :span="20" style="padding:10px">
           <el-card>
             <el-row>
-              <el-col :span="6">
+              <el-col :span="8">
                 <el-input v-model="name" style="width:300px" placeholder="请输入商品名称"></el-input>
               </el-col>
               <el-col :span="6">
@@ -47,21 +47,48 @@
           <el-card>
             <div style="margin-bottom:20px;text-align: right">
               <el-button  type="primary" class="el-icon-plus" size="small"
-                        @click="addGoods()">增加商品</el-button>
+                        @click="addGoods(handleNodeCode)" v-if="handleNodeCode">增加商品</el-button>
             </div>
             <el-table :data="goodsData" v-loading="dataListLoading" ref="eltable" border>
+              <el-table-column type="expand">
+                <template slot-scope="scope">
+                  <el-form label-position="left" inline class="demo-table-expand">
+                    <el-form-item label="描述：">
+                      <span>{{ scope.row.goodsDesc }}</span>
+                    </el-form-item>
+                    <el-form-item label="创建时间：">
+                      <span>{{ scope.row.createTime }}</span>
+                    </el-form-item>
+                  </el-form>
+                </template>
+              </el-table-column>
               <el-table-column label="序号"  type="index"  width="50" align="center">
+              </el-table-column>
+              <el-table-column label="商品图片" align="center" prop="goodsUrl" >
+                <template slot-scope="scope">
+                  <img :src="scope.row.goodsUrl" alt="" style="width:50px;height: 50px;">
+                </template>
               </el-table-column>
               <el-table-column v-for="(item,index) in goodsTable"
                   :label="getDataLabel(item)"
                   :key="item" :prop="item"
                   align="center">
               </el-table-column>
+              <el-table-column label="商品库存" prop="goodsInventory" align="center">
+                <template slot-scope="scope">
+                  <span :style="{'color':scope.row.goodsInventory < 5?'red':''}"> {{scope.row.goodsInventory}}</span>
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" prop="status" align="center">
+                <template slot-scope="scope">
+                  {{scope.row.status === 1 ? '上架':'下架'}}
+                </template>
+              </el-table-column>
               <el-table-column label="操作" width="150" align="center">
                 <template slot-scope="scope"> 
                   <!--编辑 删除 -->
                   <el-tooltip class="item" effect="dark" content="编辑" placement="top">
-                    <i class="el-icon-edit"  @click="addGoods(scope.row.id,scope.row.categoryCode);"></i> 
+                    <i class="el-icon-edit"  @click="addGoods(scope.row.categoryCode,scope.row.id);"></i> 
                   </el-tooltip>
                   <el-tooltip class="item" effect="dark" content="删除" placement="top">
                     <i class="el-icon-delete" @click="delHandle(scope.row,scope.$index);"></i>
@@ -111,7 +138,9 @@ import {
   getCategoryInfo,
   delCategoryInfo,
   updateBrandInfo,
-updateCategoryInfo,
+  updateCategoryInfo,
+  getGoodsList,
+  delGoodsInfo,
  } from "../../../api/goods-manage";
 export default {
   data(){
@@ -124,7 +153,7 @@ export default {
         categoryName:'',
         categoryDesc:'',
       },
-      setTree:[{id:1,categoryName:'牛奶',children:[{id:1,categoryName:'牛niu奶'}]}],
+      setTree:[],
       defaultProps: {// 默认设置
 				children: 'children',
 				label: 'name'
@@ -132,11 +161,13 @@ export default {
       NODE_KEY: 'categoryCode',// id对应字段
 			MAX_LEVEL: 1,// 设定最大层级
       NODE_ID_START: 0,// 新增节点id，逐次递减
-      
+      handleNodeId:'',
+      handleNodeCode:'',
+
       //商品列表
       goodsData:[],
       dataListLoading:false,
-      goodsTable:['goodsCode','categoryName','goodsName','goodsDesc','goodsPrice','createTime','updateTime'],
+      goodsTable:['categoryName','goodsName','brandName','goodsPrice'],
       name:'',
       page:0,
       totalList:0,
@@ -153,12 +184,12 @@ export default {
   },
   mounted(){
     this.getTreeInfo();
-    // this.getInfoList('init');
+    this.getInfoList('init');
   },
   methods:{
     getDataLabel(type){
       const typeLabel = {
-        goodBrand:'商品品牌',
+        brandName:'商品品牌',
         goodsUrl:'商品图片',
         goodsCode:'商品编号',
         categoryName:'商品类别',
@@ -168,6 +199,7 @@ export default {
         createTime:'创建日期',
         updateTime:'更新日期',
         status:'发布状态',
+        goodsInventory:'商品库存'
       }
       return typeLabel[type] || '';
     },
@@ -183,7 +215,7 @@ export default {
         size:that.pageSize,
         supplierId: that.supplier,
         goodsName:that.name,
-        categoryCode: that.handleNodeId,
+        categoryCode: that.handleNodeCode,
       }).then(res=>{
         if(res && res.code === 200){
           that.goodsData = res.data.rows;
@@ -220,7 +252,7 @@ export default {
 						cancelButtonText: "取消",
 						type: "warning"
 					}).then(() => {
-						delTreeNode(_data.id).then(res=>{
+						delCategoryInfo(_data.id).then(res=>{
               console.log('删除',res);
               if(res && res.code === 200){
                 that.$nextTick(() => {
@@ -278,10 +310,9 @@ export default {
     },
     // 点击类别节点
     handleNode(_node, _data){
-      this.handleNodeId = _data.categoryCode;
-      this.getInfoList('init');//根据点击的类别 查询列表
-      console.log('所点击节点的id',this.handleNodeId);
-      
+      this.handleNodeId = _data.id;
+      this.handleNodeCode = _data.categoryCode;
+      this.getInfoList('init');//根据点击的类别 查询列表      
     },
     //清空弹窗的表单数据
     closeNodeInfo(){
@@ -331,6 +362,7 @@ export default {
                   children: [],
                 })
               }
+              that.getTreeInfo();
             }
             if(!that.nowAddPNode.expanded){
               that.nowAddPNode.expanded = true
@@ -347,22 +379,22 @@ export default {
       });
     },
     // 增加商品
-    addGoods(id,typeId){
+    addGoods(typeId,id){
       this.$router.push({
         path: '/web-goodsDetails',
-        // query:{id,typeId}
+        query:{id,typeId}
       });
     },
     delHandle(_row,index){
       const that = this;
-      this.$confirm(`确定对「 ${_row.name} 」进行「 删除 」操作?`, '提示', {
+      this.$confirm(`确定对「 ${_row.goodsName} 」进行「 删除 」操作?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        delGoods(id).then(res=>{
+        delGoodsInfo(_row.id).then(res=>{
           if(res && res.code === 200){
-            that.$message.success(`删除商品 ${_row.name} 成功`);
+            that.$message.success(`删除商品 ${_row.goodsName} 成功`);
             that.goodsData.splice(index, 1);
             that.totalList--;
           }else{
