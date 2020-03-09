@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div >
     <HeadTop/>
     <router-view class="main"></router-view>
      <transition @after-enter='afterEnter' @before-enter="beforeEnter">

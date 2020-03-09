@@ -46,7 +46,7 @@
                   </div>
                 </div>
               </div>
-              <div class="shop pr" @mouseover="cartShowState(true)" @mouseout="cartShowState(false)" 
+              <div class="shop pr" @mouseover="cartShowState(true)" @mouseout="cartShowState(false)"
                    ref="positionMsg">
                 <router-link to="/before-cart"></router-link>
                 <span class="cart-num">
@@ -163,7 +163,7 @@ export default {
   },
   computed: {
     ...mapState([
-         'login', 'receiveInCart', 'showCart','userInfo' 
+         'login', 'receiveInCart', 'showCart','userInfo'
       ]),
     // 计算价格
     totalPrice () {
@@ -215,7 +215,7 @@ export default {
           }
         })
       },
-  
+
     handleSelect (item) {
       this.input = item.value
     },
@@ -1044,7 +1044,7 @@ export default {
     }
   }
   .w{
-    width: 1220px;
+    /*width: 1120px;*/
     margin: 0 auto;
     padding: 0;
     box-sizing: border-box;

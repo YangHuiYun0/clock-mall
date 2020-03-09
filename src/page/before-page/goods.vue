@@ -30,14 +30,12 @@
                     <mall-goods v-for="(item,i) in goods" :key="i" :msg="item"></mall-goods>
                 </div>
                 <el-pagination
-                v-if="!noResult&&!error"
-                @size-change="handleSizeChange"
-                @current-change="handleCurrentChange"
-                :current-page="currentPage"
-                :page-sizes="[8, 20, 40, 80]"
-                :page-size="pageSize"
-                layout="total, sizes, prev, pager, next, jumper"
-                :total="total">
+                  background
+                  layout="total, prev, pager, next"
+                  :current-page=currentPage
+                  :total=total
+                  :page-size=pageSize
+                  @current-change="currentChangeHandle">
                 </el-pagination>
             </div>
             <div class="no-info" v-if="noResult">
@@ -83,9 +81,9 @@ export default {
             windowWidth: null,
             recommendPanel: [],
             sort: 0,
-            currentPage: 1,
+            currentPage: 0,
             total: 30,
-            pageSize: 20,
+            pageSize: 12,
             desc:this.$route.query.key || '',//根据商品查询
             goodsTypeList:[],
         }
@@ -138,7 +136,7 @@ export default {
         },
         _getAllGoods (_key) {
             if(_key){
-               this.desc = _key; 
+               this.desc = _key;
             }
             let cid = this.$route.query.cid
             if (this.min !== '') {
@@ -180,6 +178,11 @@ export default {
                 }
             }).catch()
         },
+
+      currentChangeHandle(val){
+        this.currentPage = val;
+        this._getAllGoods();
+      },
     }
 }
 

@@ -61,7 +61,7 @@
           <el-input v-model="returnReason.causeName" class="input-width"></el-input>
         </el-form-item>
         <el-form-item label="排序：" prop="sort">
-          <el-input v-model="returnReason.sort" class="input-width" 
+          <el-input v-model="returnReason.sort" class="input-width"
           show-word-limit maxlength=2  clearable></el-input>
         </el-form-item>
         <el-form-item label="是否启用：">
@@ -78,12 +78,12 @@
 
 <script>
 import { formatTime } from "../../../util/time";
-import { 
+import {
   getSaleCauseList,
   addCauseInfo,
   updateCauseInfo,
   delCauseInfo,
-  getCauseInfo 
+  getCauseInfo
 } from "../../../api/order-manage";
 import { getCategoryList } from '../../../api/goods-manage';
 export default {
@@ -98,7 +98,7 @@ export default {
     return{
       page:0,
       totalList:0,
-      pageSize:12,
+      pageSize:5,
       dataListLoading:false,
       dialogVisible:false,
       submitLoading:false,
@@ -126,6 +126,7 @@ export default {
   methods:{
     currentChangeHandle(val){
       this.page = val;
+      this.getDataList();
     },
     formatTime(timestmap) {
       return formatTime(timestmap, 'YY-MM-DD hh:mm:ss');

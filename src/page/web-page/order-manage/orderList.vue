@@ -138,7 +138,7 @@ export default {
       orderStatus:'',
       page:0,
       totalList:0,
-      pageSize:12,
+      pageSize:5,
       dialogVisible:false,
       statusOptions: [
         { label: '待付款', value: 0},
@@ -180,6 +180,7 @@ export default {
     },
     currentChangeHandle(val){
       this.page = val;
+      this.getDataList();
     },
     getDataList(type){
       if(type === 'init'){

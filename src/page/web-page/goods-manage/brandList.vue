@@ -58,7 +58,7 @@ export default {
       brandName:'',
       page:0,
       totalList:0,
-      pageSize:12,
+      pageSize:5,
       brandData:[],
       brandTable:['id','brandName','brandType','brandLetter','createTime'],
       dataListLoading:false,
@@ -128,6 +128,7 @@ export default {
     },
     currentChangeHandle(val){
       this.page = val;
+      this.getDataList();
     },
   }
 }

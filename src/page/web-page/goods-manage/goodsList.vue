@@ -5,9 +5,9 @@
       <el-row style="width: 100%">
         <el-col :span="4" class="aside">
           <div v-loading="isLoading" class="comp-tree">
-		        <el-button class="comp-tr-top" 
-              type="primary" 
-              size="small" 
+		        <el-button class="comp-tr-top"
+              type="primary"
+              size="small"
               @click="handleAddTop">添加商品大类</el-button>
             <el-tree ref="SlotTree"
               :data="setTree"
@@ -35,14 +35,8 @@
         </el-col>
         <el-col :span="20" style="padding:10px">
           <el-card>
-            <el-row>
-              <el-col :span="8">
                 <el-input v-model="name" style="width:300px" placeholder="请输入商品名称"></el-input>
-              </el-col>
-              <el-col :span="6">
                 <el-button type="success" class="el-icon-search" style="text-align: right;" @click="getInfoList()">查询</el-button>
-              </el-col>
-            </el-row>
           </el-card>
           <el-card>
             <div style="margin-bottom:20px;text-align: right">
@@ -85,10 +79,10 @@
                 </template>
               </el-table-column>
               <el-table-column label="操作" width="150" align="center">
-                <template slot-scope="scope"> 
+                <template slot-scope="scope">
                   <!--编辑 删除 -->
                   <el-tooltip class="item" effect="dark" content="编辑" placement="top">
-                    <i class="el-icon-edit"  @click="addGoods(scope.row.categoryCode,scope.row.id);"></i> 
+                    <i class="el-icon-edit"  @click="addGoods(scope.row.categoryCode,scope.row.id);"></i>
                   </el-tooltip>
                   <el-tooltip class="item" effect="dark" content="删除" placement="top">
                     <i class="el-icon-delete" @click="delHandle(scope.row,scope.$index);"></i>
@@ -132,7 +126,7 @@
 </template>
 
 <script>
-import { 
+import {
   getCategoryList,
   addCategoryInfo,
   getCategoryInfo,
@@ -171,7 +165,7 @@ export default {
       name:'',
       page:0,
       totalList:0,
-      pageSize:12,
+      pageSize:5,
       rules:{
         categoryName:[
           { required: true, message: '请输入节点名称', trigger: 'blur' },
@@ -312,7 +306,7 @@ export default {
     handleNode(_node, _data){
       this.handleNodeId = _data.id;
       this.handleNodeCode = _data.categoryCode;
-      this.getInfoList('init');//根据点击的类别 查询列表      
+      this.getInfoList('init');//根据点击的类别 查询列表
     },
     //清空弹窗的表单数据
     closeNodeInfo(){
@@ -406,10 +400,7 @@ export default {
 
     currentChangeHandle(val){
       this.page = val;
-    },
-    indexMethod(index) {
-      const _page = this.page > 0 ? this.page - 1 : this.page;
-      return this.totalList - _page * this.pageSize - index;
+      this.getInfoList();
     },
     // 关闭节点弹窗
     handleClose(done) {

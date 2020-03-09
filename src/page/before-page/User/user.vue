@@ -131,7 +131,7 @@
       }
     }
     .gray-box {
-      overflow: hidden;
+      /*overflow: hidden;*/
       background: #fff;
       border-radius: 8px;
       border: 1px solid #dcdcdc;

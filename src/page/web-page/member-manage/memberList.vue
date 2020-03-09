@@ -57,7 +57,7 @@ export default {
       phone:'',
       page:0,
       totalList:0,
-      pageSize:12,
+      pageSize:5,
       memberData:[],
       dataListLoading:false,
     }
@@ -71,6 +71,7 @@ export default {
     },
     currentChangeHandle(val){
       this.page = val;
+      this.getDataList();
     },
     getDataList(type){
       if(type === 'init'){

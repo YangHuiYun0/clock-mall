@@ -56,7 +56,7 @@ export default {
     return{
       page:0,
       totalList:0,
-      pageSize:12,
+      pageSize:5,
       orderCode:'',
       status:'',
       dataListLoading:false,
@@ -69,6 +69,7 @@ export default {
   methods:{
     currentChangeHandle(val){
       this.page = val;
+      this.getDataList();
     },
     formatTime(timestmap) {
       return formatTime(timestmap, 'YY-MM-DD hh:mm:ss');
