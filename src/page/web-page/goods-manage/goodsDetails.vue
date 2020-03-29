@@ -64,6 +64,9 @@
           </el-upload>
           <img v-if="dataForm.goodsUrl" :src="dataForm.goodsUrl" class="avatar">
         </el-form-item>
+        <el-form-item label="商品详情" prop="goodsCode">
+          <tinymce v-model="dataForm.goodsCode" :height="300" :width="900"/>
+        </el-form-item>
         <el-form-item>
           <el-button type="success" @click="submitForm" :loading="submitLoading">保存</el-button>
           <el-button type="warning" @click="cancelForm" :loading="submitLoading">取消</el-button>
@@ -75,6 +78,7 @@
 
 <script>
 import { getImageUrl } from "@/api/home-set";
+import Tinymce from '@/components/Tinymce';
 import { 
   addGoodsInfo,
   getGoodsInfo,
@@ -84,6 +88,9 @@ import {
   getChildrenTypeInfo
  } from "../../../api/goods-manage";
 export default {
+  components:{
+      Tinymce
+  },
   data(){
     const priceRequire = (rule, value, callback) => {
       if (!String(value).match(/^[0-9]\d*(\.[0-9]{1,2})*$/)) {
@@ -113,6 +120,7 @@ export default {
         goodsLimit:'',
         categoryCode:'',
         goodsAttr:'',
+        goodsCode:'',
       },
       goodsTypeList:[],
       brandTypeList:[],
@@ -144,6 +152,9 @@ export default {
         goodsUrl:[
           { required: true, message: '请选择商品图片', trigger: 'blur' },
         ],
+        goodsCode:[
+          { required: true, message: '请输入商品详情', trigger: 'blur' },
+        ]
       },
     }
   },

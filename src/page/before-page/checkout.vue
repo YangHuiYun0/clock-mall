@@ -87,7 +87,7 @@ import YHeader from '../../common/header'
 import { mapMutations, mapState } from 'vuex'
 import YShelf from "../../components/shelf";
 import YButton  from "../../components/yButton";
-import { getAddressList,submitOrdersInfo} from "../../api/user";
+import { getAddressList,submitOrdersInfo,submitPayInfo} from "../../api/user";
 export default {
   components:{
     YHeader,YShelf,YButton
@@ -101,7 +101,7 @@ export default {
       receiverName:'',
       // 订单列表
       cartList:[],
-      submitOrder: '提交订单',
+      submitOrder: '去支付',
       orderTotal: 0,
       submit: false,
       dataListLoading:false,
@@ -172,18 +172,18 @@ export default {
       return itemIds
     },
     _submitOrder () {
-      this.submitOrder = '提交订单中...'
+      this.submitOrder = '支付中...'
       this.submit = true
       var array = []
       if (!this.id) {
         this.$message.error('请选择收货地址')
-        this.submitOrder = '提交订单'
+        this.submitOrder = '去支付'
         this.submit = false
         return
       }
       if (this.cartList.length === 0) {
         this.$message.error('非法操作')
-        this.submitOrder = '提交订单'
+        this.submitOrder = '去支付'
         this.submit = false
         return
       }
@@ -192,17 +192,26 @@ export default {
         addressId: this.id,
         itemIds: itemIds
       }
-      // 提交订单 
-      submitOrdersInfo(params).then(res => {
-        if (res && res.code === 200) {
-          this.$message.success('购买成功');
-          this.$router.push({path: '/user/before-orderList'})
-        } else {
-          this.$message.error(res.message)
-          this.submitOrder = '提交订单'
-          this.submit = false
-        }
+
+      // 跳转支付
+      submitPayInfo(params).then(res => {
+        console.log('支付信息',res)
+        const div = document.createElement('div');
+        div.innerHTML = res;
+        document.body.appendChild(div);
+        document.forms[0].submit();
       })
+      // 去支付 
+      // submitOrdersInfo(params).then(res => {
+      //   if (res && res.code === 200) {
+      //     this.$message.success('购买成功');
+      //     this.$router.push({path: '/user/before-orderList'})
+      //   } else {
+      //     this.$message.error(res.message)
+      //     this.submitOrder = '去支付'
+      //     this.submit = false
+      //   }
+      // })
     },
   }
 }

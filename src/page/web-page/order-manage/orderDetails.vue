@@ -15,14 +15,16 @@
         <el-row>
           <el-col :span="6" class="table-cell-title">订单编号</el-col>
           <el-col :span="6" class="table-cell-title">快递单号</el-col>
-          <el-col :span="6" class="table-cell-title">用户名</el-col>
-          <el-col :span="6" class="table-cell-title">订单状态</el-col>
+          <el-col :span="4" class="table-cell-title">快递公司</el-col>
+          <el-col :span="4" class="table-cell-title">用户名</el-col>
+          <el-col :span="4" class="table-cell-title">订单状态</el-col>
         </el-row>
         <el-row>
           <el-col :span="6" class="table-cell">{{order.orderCode}}</el-col>
           <el-col :span="6" class="table-cell">{{order.deliverySn?order.deliverySn:'暂无'}}</el-col>
-          <el-col :span="6" class="table-cell">{{order.customerName}}</el-col>
-          <el-col :span="6" class="table-cell">{{formatStatus(order.status)}}</el-col>
+          <el-col :span="4" class="table-cell">{{order.deliveryType?order.deliveryType:'暂无'}}</el-col>
+          <el-col :span="4" class="table-cell">{{order.customerName}}</el-col>
+          <el-col :span="4" class="table-cell">{{formatStatus(order.status)}}</el-col>
         </el-row>
       </div>
       <div style="margin-top: 20px">

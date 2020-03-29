@@ -58,6 +58,15 @@ export function submitOrdersInfo (data) {
   });
 }
 
+// 跳转支付
+export function submitPayInfo (data) {
+  return request({
+    url: '/pay/info',
+    method: 'post',
+    data
+  });
+}
+
   //我的订单
   export function getMyOrdersList(params) {
     return request({

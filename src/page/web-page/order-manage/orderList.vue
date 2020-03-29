@@ -105,6 +105,15 @@
           </el-form-item>
           <el-form-item label="地址:">
             {{listItem.receiverAddress}}
+          </el-form-item >
+          <el-form-item label="快递公司:" prop="deliveryType">
+            <el-select v-model="listItem.deliveryType" class="input-width" clearable>
+              <el-option v-for="item in deliveryOptions"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.label">
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item label="快递单号:" prop="deliverySn">
             <el-input v-model="listItem.deliverySn" placeholder="快递单号" show-word-limit maxlength=25
@@ -113,7 +122,7 @@
         </el-form>
       <span slot="footer" class="dialog-footer">
     <el-button @click="dialogVisible = false">取 消</el-button>
-    <el-button v-if="listItem.deliverySn" type="primary" @click="formSubmit()">提 交</el-button>
+    <el-button type="primary" @click="formSubmit()">提 交</el-button>
   </span>
     </el-dialog>
   </div>
@@ -147,10 +156,23 @@ export default {
         { label: '已完成', value: 3},
         { label: '已关闭', value: 4}
       ],
+      deliveryOptions:[
+        { label: '顺丰速递', value: 0},
+        { label: '邮政快递', value: 1},
+        { label: '圆通速递', value: 2},
+        { label: '中通快递', value: 3},
+        { label: '申通快递', value: 4},
+        { label: '天天快递', value: 5},
+        { label: '韵达速递', value: 6},
+        { label: '京东物流', value: 7},
+      ],
       dataListLoading:false,
       orderData:[],
       listItem:[],
       rules:{
+        deliveryType:[
+          {required: true, message: '请选择快递公司', trigger: 'blur'},
+        ],
         deliverySn:[
           {required: true, message: '请输入快递单号', trigger: 'blur'},
           {required: true, trigger: 'blur', validator: deliverySnRequire}
@@ -242,7 +264,9 @@ export default {
           receiverName:order.receiverName,
           receiverPhone:order.receiverPhone,
           receiverAddress:order.receiverAddress,
+          orderCode:order.orderCode,
           deliverySn:null,
+          deliveryType:'顺丰快递',
         };
         return listItem;
       },
@@ -262,7 +286,8 @@ export default {
         }
         that.submitLoading = true;
         setDeliveryCode(that.listItem.orderId,{
-          code:that.listItem.deliverySn
+          code:that.listItem.deliverySn,
+          type:that.listItem.deliveryType,
         }).then(res =>{
           if(res && res.code === 200){
             that.$message.success('商品发货成功');

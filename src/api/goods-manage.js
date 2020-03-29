@@ -134,3 +134,20 @@ export function editGoodsInfo(id,data) {
       data
   })
 }
+
+// 新增评论
+export function addCommentInfo(data) {
+  return request({
+      url:'/comment',
+      method:'post',
+      data
+  })
+}
+
+export function getCommentList(params) {
+  return request({
+    url: '/comment/list',
+    method: 'get',
+    params
+  });
+}

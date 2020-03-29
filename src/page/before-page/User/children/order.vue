@@ -81,6 +81,16 @@
             {{scope.row.receiverPhone}}
           </template>
         </el-table-column>
+        <el-table-column label="快递单号" align="center" prop="deliverySn" >
+          <template slot-scope="scope">
+            {{scope.row.deliverySn}}
+          </template>
+        </el-table-column>
+        <el-table-column label="快递公司" align="center" prop="deliveryType" >
+          <template slot-scope="scope">
+            {{scope.row.deliveryType}}
+          </template>
+        </el-table-column>
         <el-table-column label="实付总价" align="center" prop="orderAmount" >
           <template slot-scope="scope">
             {{scope.row.orderAmount}}
@@ -97,6 +107,7 @@
                 'el-tag--info': scope.row.status === 2,
                 'el-tag--warning': scope.row.status === 3,
                 'el-tag--info': scope.row.status === 4,
+                'el-tag--danger': scope.row.status === 5,
               }]"
               effect="plain">
               {{ setOrderStatus(scope.row.status)}}
@@ -107,6 +118,7 @@
             <template slot-scope="scope">
               <el-button type="primary" size="mini" @click="getOrder(scope.row,scope.$index)" v-if="scope.row.status<3">{{setBtnType(scope.row.status)}}</el-button>
               <el-button type="danger" size="mini" @click="delOrder(scope.row,scope.$index)" v-if="scope.row.status == 2 || scope.row.status==4">删除订单</el-button>
+              <el-button type="primary" size="mini" @click="playOrder(scope.row,scope.$index)" v-if="scope.row.status == 5">去支付</el-button>
             </template>
           </el-table-column>
       </el-table>
@@ -149,7 +161,7 @@
 <script>
 import YShelf from '../../../../components/shelf'
 import YButton from "../../../../components/yButton";
-import { getMyOrdersList,editOrderStatus,delOrderInfo } from "../../../../api/user";
+import { getMyOrdersList,editOrderStatus,delOrderInfo,submitPayInfo } from "../../../../api/user";
 import { getSaleCauseList,setRefundCause } from "../../../../api/order-manage";
 export default {
   components:{
@@ -220,7 +232,7 @@ export default {
         })
       }).catch(()=>{});
     },
-    // 现在付款
+    
     getOrder(row,index){
       if(row.status === 0){
         this.$message.success('已提交催单申请');
@@ -252,6 +264,19 @@ export default {
           }
         })
       }
+    },
+    // 现在付款
+    playOrder(row,index){
+       // 跳转支付
+      submitPayInfo({
+        orderId:row.id
+      }).then(res => {
+        console.log('支付信息',res)
+        const div = document.createElement('div');
+        div.innerHTML = res;
+        document.body.appendChild(div);
+        document.forms[0].submit();
+      })
     },
 
     formSubmit(){
@@ -302,6 +327,9 @@ export default {
           break;
         case 4:
           return '已退款'
+          break;
+        case 5:
+          return '未付款'
           break;
         default:
           break;

@@ -41,20 +41,61 @@
         </div>
       </div>
     </div>
+    <!--产品信息-->
+    <div class="item-info">
+     <div class="gray-boxs">
+        <div class="title">
+          <h2>商品信息</h2>
+        </div>
+        <div>
+          <div class="img-item" v-if="product.goodsCode">
+            <div v-html="product.goodsCode"></div>
+          </div>
+          <div class="no-info" v-else>
+            <img src="/static/images/no-data.png">
+            <br>
+            该商品暂无详细内容数据
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--产品评论-->
+    <div class="item-info">
+     <div class="gray-boxs">
+        <div class="title">
+          <h2>商品评论</h2>
+        </div>
+        <div>
+          <!-- <div class="img-item" v-if="product.goodsCode">
+            <div v-html="product.goodsCode"></div>
+          </div> -->
+          <div class="no-info" v-if="commentData.length === 0">
+            <img src="/static/images/no-data.png">
+            <br>
+            该商品暂无评论数据
+          </div>
+          <div id="comment">
+            <Commemt v-if="isShowComment" :comments="commentData" :goodsId="goodsId" 
+            @updataComment="updataComment()"></Commemt>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
-  // import { productDet, addCart } from '/api/goods'
+  import Cookies from 'js-cookie';
   import { mapMutations, mapState } from 'vuex'
   import YShelf from '../../components/shelf'
   import BuyNum from '../../components/buynum'
   import YButton from '../../components/yButton'
-  import { getGoodsInfo } from "../../api/goods-manage";
+   import Commemt from '../../components/comment/comment'
+  import { getGoodsInfo,addCommentInfo,getCommentList } from "../../api/goods-manage";
   import { joinCart } from "../../api/before-goods";
-  // import { getStore } from '/utils/storage'
   export default {
     data () {
       return {
+        isShowComment:false,
         product: {
           salePrice: 0,
           limitNum: 0,
@@ -66,7 +107,9 @@
           brandName:'',
         },
         buyQuantity: 1,
-        userId: ''
+        goodsId: '',
+        commentData:[ ],
+        
       }
     },
     computed: {
@@ -80,6 +123,11 @@
             console.log('商品详情',res);
             this.product = res.data;
             this.big = res.data.goodsUrl;
+            this.goodsId = res.data.id;
+            this.$nextTick(()=>{
+              this.isShowComment = true;
+            })
+
           }
         })
       },
@@ -124,14 +172,26 @@
       },
       editNum (num) {
         this.buyQuantity = num
+      },
+      updataComment(){
+         getCommentList({
+            goodsId:this.goodsId
+          }).then(res => {
+            this.commentData = res.data;
+          })
       }
     },
     components: {
-      YShelf, BuyNum, YButton
+      YShelf, BuyNum, YButton,Commemt
     },
     created () {
-      let id = this.$route.query.id
-      this._productDet(id)
+      let id = this.$route.query.id;
+      this._productDet(id);
+      getCommentList({
+        goodsId:id
+      }).then(res => {
+        this.commentData = res.data;
+      })
     }
   }
 </script>
@@ -238,10 +298,41 @@
   }
 
   .item-info {
-
-    .gray-box {
-      padding: 0;
-      display: block;
+    padding: 10px 80px;
+    .gray-boxs {
+      position: relative;
+      margin-bottom: 30px;
+      overflow: hidden;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #dcdcdc;
+      border-color: rgba(0, 0, 0, .14);
+      box-shadow: 0 3px 8px -6px rgba(0, 0, 0, .1);
+      .title {
+        padding-left: 30px;
+        position: relative;
+        z-index: 10;
+        height: 60px;
+        padding: 0 10px 0 24px;
+        border-bottom: 1px solid #d4d4d4;
+        border-radius: 8px 8px 0 0;
+        box-shadow: rgba(0, 0, 0, .06) 0 1px 7px;
+        background: #f3f3f3;
+        background: -webkit-linear-gradient(#fbfbfb, #ececec);
+        background: linear-gradient(#fbfbfb, #ececec);
+        line-height: 60px;
+        font-size: 18px;
+        color: #333;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        h2 {
+          font-size: 18px;
+          font-weight: 400;
+          color: #626262;
+          display: inline-block;
+        }
+      }
     }
     .img-item {
       width: 1220px;

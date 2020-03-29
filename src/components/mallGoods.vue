@@ -40,8 +40,6 @@
       }
     },
     mounted(){
-      console.log('商品数据',this.msg);
-      
     },
     computed: {
       ...mapState(['login', 'showMoveImg', 'showCart'])

@@ -19,6 +19,14 @@
                     :value="item.categoryCode">
                     </el-option>
                 </el-select>
+                 <el-select v-model="brandType" clearable  placeholder="品牌类别" >
+                    <el-option
+                        v-for="item in brandTypeList"
+                        :key="item.id"
+                        :label="item.brandName"
+                        :value="item.id">
+                    </el-option>
+                </el-select>
                 <y-button text="确定" classStyle="main-btn" @btnClick="reset" style="margin-left: 10px;"></y-button>
                 </div>
             </div>
@@ -60,7 +68,7 @@ import YShelf from "../../components/shelf"; //卡片组件
 import mallGoods from "../../components/mallGoods";
 import YButton  from "../../components/yButton";
 import { getAllGoodsList } from "../../api/before-goods";
-import { getCategoryList } from "../../api/goods-manage";
+import { getCategoryList,getBrandList } from "../../api/goods-manage";
 
 export default {
     components:{
@@ -74,6 +82,7 @@ export default {
             min: '',
             max: '',
             goodsType:'',
+            brandType:'',
             loading: false,
             timer: null,
             sortType: 1,
@@ -86,11 +95,13 @@ export default {
             pageSize: 12,
             desc:this.$route.query.key || '',//根据商品查询
             goodsTypeList:[],
+            brandTypeList:[],
         }
     },
     mounted(){
         this._getAllGoods();
         this.getTreeInfo();
+        this.getBrandTypeInfo();
     },
     watch:{
         $route: function(to, from) {
@@ -153,6 +164,7 @@ export default {
                 amountEnd: this.max,
                 desc: this.desc,
                 categoryCode: this.goodsType,
+                brandId:this.brandType,
             }
             getAllGoodsList(params).then(res => {
               if (res && res.code === 200) {
@@ -183,6 +195,20 @@ export default {
         this.currentPage = val;
         this._getAllGoods();
       },
+
+       getBrandTypeInfo(){
+            const that = this;
+            getBrandList({
+                page:0,
+                size:100,
+            }).then(res=>{
+                if(res && res.code === 200){
+                    that.brandTypeList = res.data.rows;
+                }else{
+                    that.$message.error(res.msg);
+                }
+            })
+        },
     }
 }
 
